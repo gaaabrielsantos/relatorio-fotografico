@@ -1,16 +1,46 @@
-# React + Vite
+# Relatório Fotográfico
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Desenvolvi este projeto pensando no dia a dia do meu trabalho atual.
 
-Currently, two official plugins are available:
+A criação de relatórios fotográficos é uma tarefa que pode acabar sendo repetitiva e trabalhosa, principalmente quando é necessário organizar imagens, legendas, informações do serviço, responsáveis técnicos e manter um padrão entre todas as páginas.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+A ideia deste projeto foi deixar esse processo um pouco mais automatizado, padronizado e coerente.
 
-## React Compiler
+Com a aplicação, é possível preencher as informações do relatório, adicionar as fotografias, inserir legendas, configurar cabeçalho, rodapé e assinaturas, além de visualizar o resultado em formato A4 antes de imprimir ou salvar em PDF.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Funcionalidades
 
-## Expanding the ESLint configuration
+- Cadastro das informações gerais do relatório
+- Upload de cabeçalho e rodapé
+- Adição de fotografias com legenda
+- Organização automática das fotos nas páginas
+- Cadastro de responsáveis técnicos
+- Assinatura física ou digital
+- Numeração automática das folhas
+- Visualização em formato A4
+- Impressão ou exportação para PDF
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Tecnologias utilizadas
+
+- React
+- Vite
+- JavaScript
+- CSS
+
+## Como executar
+
+Instale as dependências:
+
+```bash
+npm install
+
+Inicie o projeto:
+
+npm run dev
+
+Para gerar a versão de produção:
+
+npm run build
+Publicação
+
+O projeto também está sendo publicado na Vercel para facilitar o acesso e permitir o uso direto pelo navegador.
