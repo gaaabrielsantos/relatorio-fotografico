@@ -1,5 +1,23 @@
 import PhotoSection from './PhotoSection'
 import SignaturePage from './SignaturePage'
+import type { ReportGeneralInfo, ReportPhoto, ReportSignature } from '../types/report'
+
+interface PhotoPageProps {
+  photos?: ReportPhoto[]
+  allPhotos?: ReportPhoto[]
+  showGeneralInfo: boolean
+  showRepeatedTitle: boolean
+  generalInfo: ReportGeneralInfo
+  signatures?: ReportSignature[]
+  embedSignature?: boolean
+  watermarkPhotoPlaceholder?: boolean
+}
+
+interface InfoField {
+  label: string
+  value: string
+  placeholder: string
+}
 
 export default function PhotoPage({
   photos = [],
@@ -10,43 +28,43 @@ export default function PhotoPage({
   signatures = [],
   embedSignature = false,
   watermarkPhotoPlaceholder = false,
-}) {
+}: PhotoPageProps) {
   const shouldEmbedSignature = embedSignature && photos.length === 1
   const shouldShowPhotoPlaceholder = watermarkPhotoPlaceholder && photos.length === 0
 
   const titleText = generalInfo?.title?.trim() ? generalInfo.title : 'Titulo do relatorio'
   const subtitleText = generalInfo?.subtitle?.trim() ? generalInfo.subtitle : ''
 
-  const infoFields = [
+  const infoFields: InfoField[] = [
     {
       label: 'Endereco',
-      value: generalInfo?.address,
+      value: generalInfo.address,
       placeholder: 'Endereco do local',
     },
     {
       label: 'Data da vistoria',
-      value: generalInfo?.surveyDate,
+      value: generalInfo.surveyDate,
       placeholder: 'Data da vistoria',
     },
     {
       label: 'Responsavel',
-      value: generalInfo?.responsible,
+      value: generalInfo.responsible,
       placeholder: 'Nome do responsavel',
     },
     {
       label: 'Processo/Convenio',
-      value: generalInfo?.processNumber,
+      value: generalInfo.processNumber,
       placeholder: 'Numero do processo ou convenio',
     },
   ]
 
-  const descriptionValue = generalInfo?.description?.trim()
+  const descriptionValue = generalInfo.description.trim()
 
   return (
     <div className="photo-page-content">
       {showGeneralInfo && (
         <section className="general-info-box avoid-break">
-          <h2 className={generalInfo?.title?.trim() ? '' : 'watermark-text'}>{titleText}</h2>
+          <h2 className={generalInfo.title.trim() ? '' : 'watermark-text'}>{titleText}</h2>
           {subtitleText ? <h3>{subtitleText}</h3> : null}
           <div className="general-info-grid">
             {infoFields.map((field) => {

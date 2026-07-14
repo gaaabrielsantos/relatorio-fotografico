@@ -1,6 +1,9 @@
+import type { CompressedImageResult } from '../types/report'
+import { sanitizeFilename } from './filenameUtils'
+
 const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 
-export function validateImageFile(file, maxFileSizeMB = 12) {
+export function validateImageFile(file: File, maxFileSizeMB = 12): void {
   if (!file) {
     throw new Error('Nenhum arquivo selecionado.')
   }
@@ -15,7 +18,7 @@ export function validateImageFile(file, maxFileSizeMB = 12) {
   }
 }
 
-function loadImage(src) {
+function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image()
     img.onload = () => resolve(img)
@@ -24,16 +27,22 @@ function loadImage(src) {
   })
 }
 
-function readAsDataURL(file) {
+function readAsDataURL(file: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
-    reader.onload = () => resolve(reader.result)
+    reader.onload = () => {
+      if (typeof reader.result !== 'string') {
+        reject(new Error('Falha ao ler arquivo.'))
+        return
+      }
+      resolve(reader.result)
+    }
     reader.onerror = () => reject(new Error('Falha ao ler arquivo.'))
     reader.readAsDataURL(file)
   })
 }
 
-function toBlob(canvas, type, quality) {
+function toBlob(canvas: HTMLCanvasElement, type: string, quality: number): Promise<Blob> {
   return new Promise((resolve, reject) => {
     canvas.toBlob((blob) => {
       if (!blob) {
@@ -45,7 +54,18 @@ function toBlob(canvas, type, quality) {
   })
 }
 
-export async function compressImageFile(file, options = {}) {
+export interface CompressOptions {
+  maxFileSizeMB?: number
+  compressAboveMB?: number
+  maxWidth?: number
+  maxHeight?: number
+  quality?: number
+}
+
+export async function compressImageFile(
+  file: File,
+  options: CompressOptions = {},
+): Promise<CompressedImageResult> {
   const {
     maxFileSizeMB = 12,
     compressAboveMB = 2,
@@ -80,6 +100,9 @@ export async function compressImageFile(file, options = {}) {
   canvas.height = height
 
   const ctx = canvas.getContext('2d', { alpha: false })
+  if (!ctx) {
+    throw new Error('Nao foi possivel processar a imagem.')
+  }
   ctx.fillStyle = '#ffffff'
   ctx.fillRect(0, 0, width, height)
   ctx.drawImage(img, 0, 0, width, height)
@@ -98,10 +121,6 @@ export async function compressImageFile(file, options = {}) {
   }
 }
 
-export function sanitizeFileName(name) {
-  return name
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-zA-Z0-9]+/g, '_')
-    .replace(/^_+|_+$/g, '')
+export function sanitizeFileName(name: string): string {
+  return sanitizeFilename(name)
 }

@@ -1,6 +1,13 @@
 import ImageUpload from './ImageUpload'
+import type { ReportHeaderFooter } from '../types/report'
 
-export default function FooterUpload({ footer, onUpdate, onError }) {
+interface FooterUploadProps {
+  footer: ReportHeaderFooter
+  onUpdate: (patch: Partial<ReportHeaderFooter>) => void
+  onError?: (message: string) => void
+}
+
+export default function FooterUpload({ footer, onUpdate, onError }: FooterUploadProps) {
   const widthPercent = Number.isFinite(Number(footer?.widthPercent))
     ? Number(footer.widthPercent)
     : 100
@@ -25,14 +32,16 @@ export default function FooterUpload({ footer, onUpdate, onError }) {
         min="20"
         max="100"
         value={widthPercent}
-        onChange={(event) => onUpdate({ widthPercent: Number(event.target.value) })}
+        onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+          onUpdate({ widthPercent: Number(event.target.value) })
+        }
       />
 
       <div className="footer-quick-actions">
         <button
           type="button"
           className="btn secondary"
-          onClick={() => onUpdate({ widthPercent: 100 })}
+          onClick={(_event: React.MouseEvent<HTMLButtonElement>) => onUpdate({ widthPercent: 100 })}
           disabled={widthPercent === 100}
         >
           Usar largura total
@@ -45,7 +54,9 @@ export default function FooterUpload({ footer, onUpdate, onError }) {
       <select
         id="footer-repeat"
         value={footer.repeatMode}
-        onChange={(event) => onUpdate({ repeatMode: event.target.value })}
+        onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
+          onUpdate({ repeatMode: event.target.value as ReportHeaderFooter['repeatMode'] })
+        }
       >
         <option value="all">Em todas as paginas</option>
         <option value="first">Somente na primeira pagina</option>

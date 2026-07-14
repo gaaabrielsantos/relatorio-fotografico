@@ -1,6 +1,13 @@
 import ImageUpload from './ImageUpload'
+import type { ReportHeaderFooter } from '../types/report'
 
-export default function HeaderUpload({ header, onUpdate, onError }) {
+interface HeaderUploadProps {
+  header: ReportHeaderFooter
+  onUpdate: (patch: Partial<ReportHeaderFooter>) => void
+  onError?: (message: string) => void
+}
+
+export default function HeaderUpload({ header, onUpdate, onError }: HeaderUploadProps) {
   const widthPercent = Number.isFinite(Number(header?.widthPercent))
     ? Number(header.widthPercent)
     : 100
@@ -11,7 +18,7 @@ export default function HeaderUpload({ header, onUpdate, onError }) {
       <ImageUpload
         label="Cabecalho"
         value={header.imageDataUrl}
-        onChange={(imageDataUrl) => onUpdate({ imageDataUrl })}
+        onChange={(imageDataUrl: string) => onUpdate({ imageDataUrl })}
         onError={onError}
         onRemove={() => onUpdate({ imageDataUrl: '' })}
       />
@@ -25,7 +32,9 @@ export default function HeaderUpload({ header, onUpdate, onError }) {
         min="20"
         max="100"
         value={widthPercent}
-        onChange={(event) => onUpdate({ widthPercent: Number(event.target.value) })}
+        onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+          onUpdate({ widthPercent: Number(event.target.value) })
+        }
       />
 
       <label className="field-label" htmlFor="header-repeat">
@@ -34,7 +43,9 @@ export default function HeaderUpload({ header, onUpdate, onError }) {
       <select
         id="header-repeat"
         value={header.repeatMode}
-        onChange={(event) => onUpdate({ repeatMode: event.target.value })}
+        onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
+          onUpdate({ repeatMode: event.target.value as ReportHeaderFooter['repeatMode'] })
+        }
       >
         <option value="all">Em todas as paginas</option>
         <option value="first">Somente na primeira pagina</option>

@@ -1,5 +1,15 @@
 import { ImagePlus, Trash2 } from 'lucide-react'
 import { compressImageFile } from '../utils/imageUtils'
+import type { ReportSignature } from '../types/report'
+
+interface SignatureSectionProps {
+  signatures: ReportSignature[]
+  onAdd: () => void
+  onUpdate: (signatureId: string, patch: Partial<ReportSignature>) => void
+  onRemove: (signatureId: string) => void
+  onError?: (message: string) => void
+  editable?: boolean
+}
 
 export default function SignatureSection({
   signatures,
@@ -8,11 +18,14 @@ export default function SignatureSection({
   onRemove,
   onError,
   editable = true,
-}) {
+}: SignatureSectionProps) {
   const canAdd = signatures.length < 4
   const gridClass = `signatures-grid signatures-${signatures.length}`
 
-  const handleUpload = async (signatureId, event) => {
+  const handleUpload = async (
+    signatureId: string,
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = event.target.files?.[0]
     if (!file) return
 
@@ -21,7 +34,7 @@ export default function SignatureSection({
       onUpdate(signatureId, { signatureImageDataUrl: processed.dataUrl, mode: 'digital' })
       onError?.('')
     } catch (error) {
-      onError?.(error.message)
+      onError?.(error instanceof Error ? error.message : 'Falha ao processar assinatura.')
     } finally {
       event.target.value = ''
     }
@@ -43,7 +56,9 @@ export default function SignatureSection({
                       type="radio"
                       name={`mode-${signature.id}`}
                       checked={signature.mode === 'physical'}
-                      onChange={() => onUpdate(signature.id, { mode: 'physical' })}
+                      onChange={(_event: React.ChangeEvent<HTMLInputElement>) =>
+                        onUpdate(signature.id, { mode: 'physical' })
+                      }
                     />
                     <span>Assinatura fisica</span>
                   </label>
@@ -53,7 +68,9 @@ export default function SignatureSection({
                       type="radio"
                       name={`mode-${signature.id}`}
                       checked={signature.mode === 'digital'}
-                      onChange={() => onUpdate(signature.id, { mode: 'digital' })}
+                      onChange={(_event: React.ChangeEvent<HTMLInputElement>) =>
+                        onUpdate(signature.id, { mode: 'digital' })
+                      }
                     />
                     <span>Assinatura digital</span>
                   </label>
@@ -87,19 +104,23 @@ export default function SignatureSection({
                     type="text"
                     placeholder="Nome do responsável"
                     value={signature.name}
-                    onChange={(event) => onUpdate(signature.id, { name: event.target.value })}
+                      onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                        onUpdate(signature.id, { name: event.target.value })
+                      }
                   />
                   <input
                     type="text"
                     placeholder="Cargo/Função"
                     value={signature.role}
-                    onChange={(event) => onUpdate(signature.id, { role: event.target.value })}
+                      onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                        onUpdate(signature.id, { role: event.target.value })
+                      }
                   />
                   <input
                     type="text"
                     placeholder="Número de registro"
                     value={signature.registrationNumber}
-                    onChange={(event) =>
+                      onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
                       onUpdate(signature.id, { registrationNumber: event.target.value })
                     }
                   />

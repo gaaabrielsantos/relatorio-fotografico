@@ -1,6 +1,15 @@
 import { ImagePlus, Trash2 } from 'lucide-react'
 import { compressImageFile } from '../utils/imageUtils'
 
+interface ImageUploadProps {
+  label: string
+  value: string
+  onChange: (imageDataUrl: string) => void
+  onError?: (message: string) => void
+  onRemove?: () => void
+  maxFileSizeMB?: number
+}
+
 export default function ImageUpload({
   label,
   value,
@@ -8,8 +17,8 @@ export default function ImageUpload({
   onError,
   onRemove,
   maxFileSizeMB = 12,
-}) {
-  const handleFileChange = async (event) => {
+}: ImageUploadProps) {
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file) return
 
@@ -18,7 +27,7 @@ export default function ImageUpload({
       onChange(processed.dataUrl)
       onError?.('')
     } catch (error) {
-      onError?.(error.message)
+      onError?.(error instanceof Error ? error.message : 'Falha ao processar imagem.')
     } finally {
       event.target.value = ''
     }
@@ -40,7 +49,11 @@ export default function ImageUpload({
           className="file-input"
         />
         {value && (
-          <button type="button" className="btn danger" onClick={onRemove}>
+          <button
+            type="button"
+            className="btn danger"
+            onClick={(_event: React.MouseEvent<HTMLButtonElement>) => onRemove?.()}
+          >
             <Trash2 size={16} />
             <span>Remover</span>
           </button>

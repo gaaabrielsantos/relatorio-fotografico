@@ -1,8 +1,20 @@
 import { useEffect, useMemo, useState } from 'react'
+import { readStorageJson, writeStorageJson } from '../utils/storageUtils'
+import type {
+  Nomenclature,
+  PersistedReport,
+  ReportData,
+  ReportGeneralInfo,
+  ReportPhoto,
+  ReportSignature,
+  ReportHeaderFooter,
+} from '../types/report'
 
 const STORAGE_KEY = 'relatorio-fotografico-v1'
 
-function createPhoto() {
+type ReportErrors = string[]
+
+function createPhoto(): ReportPhoto {
   return {
     id: crypto.randomUUID(),
     caption: '',
@@ -10,7 +22,7 @@ function createPhoto() {
   }
 }
 
-function createEmptySignature() {
+function createEmptySignature(): ReportSignature {
   return {
     id: crypto.randomUUID(),
     name: '',
@@ -21,7 +33,7 @@ function createEmptySignature() {
   }
 }
 
-function getInitialState() {
+function getInitialState(): ReportData {
   return {
     nomenclature: 'Pagina',
     header: {
@@ -49,7 +61,7 @@ function getInitialState() {
   }
 }
 
-function createPersistedReport(report) {
+function createPersistedReport(report: ReportData): PersistedReport {
   return {
     nomenclature: report.nomenclature,
     header: {
@@ -74,75 +86,117 @@ function createPersistedReport(report) {
   }
 }
 
-export function useReportState() {
-  const [report, setReport] = useState(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY)
-      if (!raw) return getInitialState()
-      const parsed = JSON.parse(raw)
-      const initial = getInitialState()
-      const merged = {
-        ...initial,
-        ...parsed,
-        header: { ...initial.header, ...(parsed.header || {}) },
-        footer: { ...initial.footer, ...(parsed.footer || {}) },
-        generalInfo: { ...initial.generalInfo, ...(parsed.generalInfo || {}) },
-      }
+type UpdateGeneralInfoField = keyof ReportGeneralInfo
+type HeaderFooterPatch = Partial<ReportHeaderFooter>
+type UpdatePhotoPatch = Partial<ReportPhoto>
+type UpdateSignaturePatch = Partial<ReportSignature>
 
-      merged.header.widthPercent = Math.max(
-        20,
-        Math.min(
-          100,
-          Number(
-            merged.header?.widthPercent
-              ?? merged.header?.height
-              ?? 100,
-          ),
-        ),
-      )
+function asRecord(value: unknown): Record<string, unknown> {
+  if (typeof value === 'object' && value !== null) {
+    return value as Record<string, unknown>
+  }
+  return {}
+}
 
-      merged.footer.widthPercent = Math.max(
-        20,
-        Math.min(100, Number(merged.footer?.widthPercent ?? 100)),
-      )
+function asString(value: unknown, fallback = ''): string {
+  return typeof value === 'string' ? value : fallback
+}
 
-      if (!Array.isArray(merged.photos) || merged.photos.length === 0) {
-        merged.photos = [createPhoto(), createPhoto()]
-      }
-      merged.photos = merged.photos.map((photo) => ({
-        id: photo.id || crypto.randomUUID(),
-        caption: photo.caption || '',
+function asNumber(value: unknown, fallback = 0): number {
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : fallback
+}
+
+function asBoolean(value: unknown, fallback = false): boolean {
+  return typeof value === 'boolean' ? value : fallback
+}
+
+function loadReportData(): ReportData {
+  const parsed = readStorageJson(STORAGE_KEY)
+  if (!parsed) {
+    return getInitialState()
+  }
+
+  const initial = getInitialState()
+  const root = asRecord(parsed)
+  const header = asRecord(root.header)
+  const footer = asRecord(root.footer)
+  const generalInfo = asRecord(root.generalInfo)
+
+  const loadedPhotos = Array.isArray(root.photos) ? root.photos : []
+  const loadedSignatures = Array.isArray(root.signatures) ? root.signatures : []
+
+  const normalizedHeaderWidth = Math.max(
+    20,
+    Math.min(100, asNumber(header.widthPercent ?? header.height, 100)),
+  )
+
+  const normalizedFooterWidth = Math.max(
+    20,
+    Math.min(100, asNumber(footer.widthPercent, 100)),
+  )
+
+  const nextPhotos = loadedPhotos.length > 0
+    ? loadedPhotos.map((photoValue) => {
+      const photo = asRecord(photoValue)
+      return {
+        id: asString(photo.id, crypto.randomUUID()),
+        caption: asString(photo.caption),
         image: null,
-      }))
-      if (!Array.isArray(merged.signatures) || merged.signatures.length === 0) {
-        merged.signatures = [createEmptySignature()]
       }
-      if (merged.signatures.length > 4) {
-        merged.signatures = merged.signatures.slice(0, 4)
-      }
-      merged.signatures = merged.signatures.map((signature) => ({
-        id: signature.id || crypto.randomUUID(),
-        name: signature.name || '',
-        role: signature.role ?? '',
-        registrationNumber: signature.registrationNumber || '',
-        signatureImageDataUrl: signature.signatureImageDataUrl || '',
-        mode: signature.mode === 'digital' ? 'digital' : 'physical',
-      }))
-      return merged
-    } catch {
-      return getInitialState()
-    }
-  })
+    })
+    : [createPhoto(), createPhoto()]
 
-  const [errors, setErrors] = useState([])
+  const slicedSignatures = loadedSignatures.slice(0, 4)
+  const nextSignatures = slicedSignatures.length > 0
+    ? slicedSignatures.map((signatureValue) => {
+      const signature = asRecord(signatureValue)
+      return {
+        id: asString(signature.id, crypto.randomUUID()),
+        name: asString(signature.name),
+        role: asString(signature.role),
+        registrationNumber: asString(signature.registrationNumber),
+        signatureImageDataUrl: asString(signature.signatureImageDataUrl),
+        mode: signature.mode === 'digital' ? 'digital' : 'physical',
+      }
+    })
+    : [createEmptySignature()]
+
+  return {
+    nomenclature: root.nomenclature === 'Folha' ? 'Folha' : initial.nomenclature,
+    header: {
+      imageDataUrl: asString(header.imageDataUrl, ''),
+      widthPercent: normalizedHeaderWidth,
+      repeatMode: header.repeatMode === 'first' ? 'first' : 'all',
+    },
+    footer: {
+      imageDataUrl: asString(footer.imageDataUrl, ''),
+      widthPercent: normalizedFooterWidth,
+      repeatMode: footer.repeatMode === 'first' ? 'first' : 'all',
+    },
+    generalInfo: {
+      title: asString(generalInfo.title),
+      subtitle: asString(generalInfo.subtitle),
+      address: asString(generalInfo.address),
+      description: asString(generalInfo.description),
+      surveyDate: asString(generalInfo.surveyDate),
+      responsible: asString(generalInfo.responsible),
+      processNumber: asString(generalInfo.processNumber),
+      repeatTitle: asBoolean(generalInfo.repeatTitle),
+    },
+    photos: nextPhotos,
+    signatures: nextSignatures,
+  }
+}
+
+export function useReportState() {
+  const [report, setReport] = useState<ReportData>(() => loadReportData())
+
+  const [errors, setErrors] = useState<ReportErrors>([])
 
   useEffect(() => {
     const dataToSave = createPersistedReport(report)
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave))
-    } catch (error) {
-      console.error('Erro ao salvar dados:', error)
-    }
+    writeStorageJson(STORAGE_KEY, dataToSave)
   }, [report])
 
   const filledPhotos = useMemo(
@@ -156,7 +210,7 @@ export function useReportState() {
   const hasEmbeddedSignaturePage = hasPhotos && lastPhotoPageSize === 1
   const totalPages = pagesForPhotos + (hasEmbeddedSignaturePage ? 0 : 1)
 
-  const updateGeneralInfo = (field, value) => {
+  const updateGeneralInfo = (field: UpdateGeneralInfoField, value: string | boolean) => {
     setReport((prev) => ({
       ...prev,
       generalInfo: {
@@ -166,15 +220,15 @@ export function useReportState() {
     }))
   }
 
-  const updateHeader = (patch) => {
+  const updateHeader = (patch: HeaderFooterPatch) => {
     setReport((prev) => ({ ...prev, header: { ...prev.header, ...patch } }))
   }
 
-  const updateFooter = (patch) => {
+  const updateFooter = (patch: HeaderFooterPatch) => {
     setReport((prev) => ({ ...prev, footer: { ...prev.footer, ...patch } }))
   }
 
-  const updateNomenclature = (value) => {
+  const updateNomenclature = (value: Nomenclature) => {
     setReport((prev) => ({
       ...prev,
       nomenclature: value === 'Folha' ? 'Folha' : 'Pagina',
@@ -188,7 +242,7 @@ export function useReportState() {
     }))
   }
 
-  const updatePhoto = (photoId, patch) => {
+  const updatePhoto = (photoId: string, patch: UpdatePhotoPatch) => {
     setReport((prev) => ({
       ...prev,
       photos: prev.photos.map((photo) =>
@@ -197,14 +251,14 @@ export function useReportState() {
     }))
   }
 
-  const removePhoto = (photoId) => {
+  const removePhoto = (photoId: string) => {
     setReport((prev) => {
       const next = prev.photos.filter((photo) => photo.id !== photoId)
       return { ...prev, photos: next }
     })
   }
 
-  const movePhoto = (photoId, direction) => {
+  const movePhoto = (photoId: string, direction: 'up' | 'down') => {
     setReport((prev) => {
       const idx = prev.photos.findIndex((photo) => photo.id === photoId)
       if (idx < 0) return prev
@@ -224,7 +278,7 @@ export function useReportState() {
     })
   }
 
-  const updateSignature = (signatureId, patch) => {
+  const updateSignature = (signatureId: string, patch: UpdateSignaturePatch) => {
     setReport((prev) => ({
       ...prev,
       signatures: prev.signatures.map((item) =>
@@ -233,7 +287,7 @@ export function useReportState() {
     }))
   }
 
-  const removeSignature = (signatureId) => {
+  const removeSignature = (signatureId: string) => {
     setReport((prev) => {
       if (prev.signatures.length <= 1) return prev
       return {

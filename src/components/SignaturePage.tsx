@@ -1,4 +1,11 @@
-export default function SignaturePage({ signatures = [], embedded = false }) {
+import type { ReportSignature } from '../types/report'
+
+interface SignaturePageProps {
+  signatures?: ReportSignature[]
+  embedded?: boolean
+}
+
+export default function SignaturePage({ signatures = [], embedded = false }: SignaturePageProps) {
   const gridClass = `signatures-grid signatures-${signatures.length}`
   const sectionClass = `signature-page-content${embedded ? ' embedded-signature-content' : ''}`
 

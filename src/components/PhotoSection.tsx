@@ -1,4 +1,12 @@
-function buildPhotoIdentifier(photo, index) {
+import type { ReportPhoto } from '../types/report'
+
+interface PhotoSectionProps {
+  photo: ReportPhoto | null
+  index: number
+  watermarkPlaceholder?: boolean
+}
+
+function buildPhotoIdentifier(photo: ReportPhoto | null, index: number): string {
   if (index === null || index === undefined || index < 0) {
     return ''
   }
@@ -12,7 +20,7 @@ export default function PhotoSection({
   photo,
   index,
   watermarkPlaceholder = false,
-}) {
+}: PhotoSectionProps) {
   const identifier = buildPhotoIdentifier(photo, index)
   const altText = identifier || 'Fotografia'
 

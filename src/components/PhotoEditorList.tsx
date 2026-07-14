@@ -1,5 +1,15 @@
 import { ArrowDown, ArrowUp, ImagePlus, Trash2 } from 'lucide-react'
 import { compressImageFile } from '../utils/imageUtils'
+import type { ReportPhoto } from '../types/report'
+
+interface PhotoEditorListProps {
+  photos: ReportPhoto[]
+  onAddPhoto: () => void
+  onUpdate: (photoId: string, patch: Partial<ReportPhoto>) => void
+  onRemove: (photoId: string) => void
+  onMove: (photoId: string, direction: 'up' | 'down') => void
+  onError?: (message: string) => void
+}
 
 export default function PhotoEditorList({
   photos,
@@ -8,8 +18,8 @@ export default function PhotoEditorList({
   onRemove,
   onMove,
   onError,
-}) {
-  const handleUpload = async (photoId, event) => {
+}: PhotoEditorListProps) {
+  const handleUpload = async (photoId: string, event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file) return
 
@@ -27,7 +37,7 @@ export default function PhotoEditorList({
       onUpdate(photoId, { image: processed.dataUrl })
       onError?.('')
     } catch (error) {
-      onError?.(error?.message || 'Nao foi possivel adicionar esta imagem. Tente novamente.')
+      onError?.(error instanceof Error ? error.message : 'Nao foi possivel adicionar esta imagem. Tente novamente.')
     } finally {
       event.target.value = ''
     }
@@ -35,7 +45,7 @@ export default function PhotoEditorList({
 
   return (
     <section className="editor-section">
-      <h3>Cadastro de fotografias</h3>
+      <h3>Fotos</h3>
       <div className="photo-editor-list">
         {photos.map((photo, index) => (
           <article className="photo-editor-card" key={photo.id}>
@@ -45,10 +55,12 @@ export default function PhotoEditorList({
             </label>
             <textarea
               id={`photo-caption-${photo.id}`}
-              rows="2"
-              maxLength="180"
+              rows={2}
+              maxLength={180}
               value={photo.caption}
-              onChange={(event) => onUpdate(photo.id, { caption: event.target.value })}
+              onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) =>
+                onUpdate(photo.id, { caption: event.target.value })
+              }
             />
 
             <div className="photo-editor-actions">
@@ -67,7 +79,7 @@ export default function PhotoEditorList({
               <button
                 type="button"
                 className="btn secondary"
-                onClick={() => onError?.('')}
+                onClick={(_event: React.MouseEvent<HTMLButtonElement>) => onError?.('')}
               >
                 Preencher espaco
               </button>
@@ -75,7 +87,9 @@ export default function PhotoEditorList({
               <button
                 type="button"
                 className="btn secondary"
-                onClick={() => onMove(photo.id, 'up')}
+                onClick={(_event: React.MouseEvent<HTMLButtonElement>) =>
+                  onMove(photo.id, 'up')
+                }
                 disabled={index === 0}
               >
                 <ArrowUp size={16} />
@@ -84,13 +98,19 @@ export default function PhotoEditorList({
               <button
                 type="button"
                 className="btn secondary"
-                onClick={() => onMove(photo.id, 'down')}
+                onClick={(_event: React.MouseEvent<HTMLButtonElement>) =>
+                  onMove(photo.id, 'down')
+                }
                 disabled={index === photos.length - 1}
               >
                 <ArrowDown size={16} />
                 <span>Descer</span>
               </button>
-              <button type="button" className="btn danger" onClick={() => onRemove(photo.id)}>
+              <button
+                type="button"
+                className="btn danger"
+                onClick={(_event: React.MouseEvent<HTMLButtonElement>) => onRemove(photo.id)}
+              >
                 <Trash2 size={16} />
                 <span>Excluir</span>
               </button>

@@ -1,3 +1,17 @@
+import type { ReactNode } from 'react'
+
+interface A4PageProps {
+  children: ReactNode
+  headerImage: string
+  headerWidthPercent: number
+  showHeader: boolean
+  footerImage: string
+  footerWidthPercent: number
+  showFooter: boolean
+  pageLabel: string
+  previewScale?: number
+}
+
 export default function A4Page({
   children,
   headerImage,
@@ -8,7 +22,7 @@ export default function A4Page({
   showFooter,
   pageLabel,
   previewScale = 1,
-}) {
+}: A4PageProps) {
   const normalizedHeaderWidth = Math.max(20, Math.min(100, Number(headerWidthPercent ?? 100)))
   const normalizedFooterWidth = Math.max(20, Math.min(100, Number(footerWidthPercent ?? 100)))
 

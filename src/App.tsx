@@ -4,15 +4,28 @@ import PhotoPage from './components/PhotoPage'
 import Sidebar from './components/Sidebar'
 import SignaturePage from './components/SignaturePage'
 import { useReportState } from './hooks/useReportState'
-import { sanitizeFileName } from './utils/imageUtils'
+import { createPdfFilename } from './utils/filenameUtils'
+import { exportReportToPdf, waitForImages } from './utils/exportPdf'
+import type { ReportPhoto } from './types/report'
 import './styles/report.css'
 import './styles/print.css'
+import './styles/pdf.css'
 
 const A4_WIDTH_PX = 794
 const A4_HEIGHT_PX = 1123
 
-function chunkPhotos(photos) {
-  const chunks = []
+type ReportPage =
+  | { type: 'draft-photo-placeholder' }
+  | {
+      type: 'photos'
+      items: ReportPhoto[]
+      photoPageIndex: number
+      embedSignature: boolean
+    }
+  | { type: 'signatures' }
+
+function chunkPhotos(photos: ReportPhoto[]): ReportPhoto[][] {
+  const chunks: ReportPhoto[][] = []
   for (let i = 0; i < photos.length; i += 2) {
     chunks.push(photos.slice(i, i + 2))
   }
@@ -40,9 +53,10 @@ function App() {
     validateBeforeExport,
   } = useReportState()
 
-  const [uiError, setUiError] = useState('')
+  const [uiError, setUiError] = useState<string>('')
+  const [isExporting, setIsExporting] = useState<boolean>(false)
   const [previewScale, setPreviewScale] = useState(1)
-  const previewPanelRef = useRef(null)
+  const previewRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
     if (!report.generalInfo.title.trim()) {
@@ -53,7 +67,7 @@ function App() {
   }, [report.generalInfo.title])
 
   useEffect(() => {
-    const panel = previewPanelRef.current
+    const panel = previewRef.current
     if (!panel) return
 
     const recalculateScale = () => {
@@ -85,7 +99,7 @@ function App() {
   const shouldShowDraftPhotoPage = useMemo(() => validPhotos.length === 0, [validPhotos.length])
 
   const reportPages = useMemo(() => {
-    const pages = []
+    const pages: ReportPage[] = []
     const hasPhotos = photoPages.length > 0
     const lastPhotoPage = photoPages.at(-1)
     const shouldEmbedSignatureInLastPhotoPage = Boolean(hasPhotos && lastPhotoPage?.length === 1)
@@ -116,7 +130,7 @@ function App() {
     [reportPages],
   )
 
-  const getPageLabel = (page, pageIndex) => {
+  const getPageLabel = (page: ReportPage, pageIndex: number) => {
     if (page.type === 'draft-photo-placeholder') {
       return ''
     }
@@ -136,17 +150,43 @@ function App() {
     setUiError('')
   }
 
-  const handleExportPdf = () => {
-    const valid = validateBeforeExport()
-    if (!valid) return
+  const handleExportPdf = async () => {
+    if (isExporting) return
+
+    validateBeforeExport()
+
+    const previewElement = previewRef.current
+    if (!previewElement) {
+      setUiError('Nao foi possivel localizar o relatorio para exportacao.')
+      return
+    }
 
     setUiError('')
-    const safeName = sanitizeFileName(report.generalInfo.title || 'Relatorio_Fotografico')
-    document.title = safeName || 'Relatorio_Fotografico'
-    window.print()
+    setIsExporting(true)
+    const fileName = createPdfFilename(report.generalInfo.title)
+
+    try {
+      if ('fonts' in document) {
+        await (document as Document & { fonts: FontFaceSet }).fonts.ready
+      }
+      await waitForImages(previewElement)
+
+      await exportReportToPdf({
+        element: previewElement,
+        filename: fileName,
+      })
+    } catch {
+      try {
+        window.print()
+      } catch {
+        setUiError('Nao foi possivel exportar o PDF. Tente novamente.')
+      }
+    } finally {
+      setIsExporting(false)
+    }
   }
 
-  const handleError = (message) => {
+  const handleError = (message: string) => {
     setUiError(message)
     if (!message) {
       setErrors([])
@@ -176,11 +216,12 @@ function App() {
           onNomenclatureChange={updateNomenclature}
           onReset={handleReset}
           onExport={handleExportPdf}
+          isExporting={isExporting}
           onError={handleError}
         />
 
-        <section className="report-preview preview-panel" id="report-preview" ref={previewPanelRef}>
-          <div className="preview-content">
+        <section className="report-preview preview-panel preview" id="report-preview" ref={previewRef}>
+          <div className="preview-content report-pages">
             {reportPages.map((page, pageIndex) => {
               const firstPage = pageIndex === 0
               const showHeader = report.header.repeatMode === 'all' || firstPage

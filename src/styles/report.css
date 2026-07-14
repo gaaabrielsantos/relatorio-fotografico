@@ -4,12 +4,12 @@
   --app-bg: #bebebe;
   --paper: #ffffff;
   --ink: #1b211c;
-  --muted: #696363;
+  --muted: #71776d;
   --line: #242424;
   --line-soft: #bebebe;
   --accent: #4dbe55;
   --danger: #bb1e10;
-  --sidebar: #8ef34b;
+  --sidebar: #ffffff;
   --sidebar-header: #4dbe5400;
   --card-bg: #ffffff00;
   --primary: #79ed91;
@@ -132,6 +132,30 @@ select:focus {
   color: var(--text-dark);
 }
 
+.sidebar-group {
+  display: block;
+}
+
+.sidebar-group-title {
+  margin: 12px 0 6px;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--text-dark);
+}
+
+aside.sidebar .sidebar-divider {
+  width: calc(100% - 60px);
+  max-width: calc(100% - 60px);
+  height: 2px;
+  margin: 20px 30px;
+  padding: 0;
+  background: #698696;
+  border: none;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
 .validation-box {
   margin: 12px 0;
   border: 1px solid var(--border);
@@ -189,9 +213,46 @@ select {
   text-align: center;
 }
 
+aside.sidebar input:not([type='range']):not([type='checkbox']):not([type='radio']):not(.file-input),
+aside.sidebar textarea,
+aside.sidebar select {
+  width: 100%;
+  box-sizing: border-box;
+  background: #f2f2f2;
+  color: #1b211c;
+  border: 1px solid #d2d2d2;
+  border-radius: 5px;
+  box-shadow: none;
+  outline: none;
+}
+
+aside.sidebar input:not([type='range']):not([type='checkbox']):not([type='radio']):not(.file-input):hover,
+aside.sidebar textarea:hover,
+aside.sidebar select:hover {
+  border-color: #bebebe;
+}
+
+aside.sidebar input:not([type='range']):not([type='checkbox']):not([type='radio']):not(.file-input):focus,
+aside.sidebar textarea:focus,
+aside.sidebar select:focus {
+  border-color: #698696;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 2px rgba(105, 134, 150, 0.15);
+  outline: none;
+}
+
+aside.sidebar input:not([type='range']):not([type='checkbox']):not([type='radio']):not(.file-input):disabled,
+aside.sidebar textarea:disabled,
+aside.sidebar select:disabled {
+  background-color: #e9e9e9;
+  color: #8b8b8b;
+  border-color: #d6d6d6;
+  cursor: not-allowed;
+}
+
 .sidebar input::placeholder,
 .sidebar textarea::placeholder {
-  color: var(--placeholder-color);
+  color: #8a8a8a;
   opacity: 1;
   font-family: 'Josefin Sans', Arial, sans-serif;
   font-style: italic;
@@ -204,7 +265,7 @@ textarea {
 
 input[type='range'] {
   padding: 0;
-  accent-color: #ff7300;
+  accent-color: #698696;
 }
 
 .checkbox-field {

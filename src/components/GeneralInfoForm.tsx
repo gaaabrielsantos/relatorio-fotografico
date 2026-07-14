@@ -1,4 +1,11 @@
-export default function GeneralInfoForm({ generalInfo, onChange }) {
+import type { ReportGeneralInfo } from '../types/report'
+
+interface GeneralInfoFormProps {
+  generalInfo: ReportGeneralInfo
+  onChange: (field: keyof ReportGeneralInfo, value: string | boolean) => void
+}
+
+export default function GeneralInfoForm({ generalInfo, onChange }: GeneralInfoFormProps) {
   return (
     <section className="editor-section">
       <h3>Informacoes gerais</h3>
@@ -10,7 +17,7 @@ export default function GeneralInfoForm({ generalInfo, onChange }) {
         id="report-title"
         type="text"
         value={generalInfo.title}
-        onChange={(event) => onChange('title', event.target.value)}
+        onChange={(event: React.ChangeEvent<HTMLInputElement>) => onChange('title', event.target.value)}
       />
 
       <label className="field-label" htmlFor="report-subtitle">
@@ -20,7 +27,7 @@ export default function GeneralInfoForm({ generalInfo, onChange }) {
         id="report-subtitle"
         type="text"
         value={generalInfo.subtitle}
-        onChange={(event) => onChange('subtitle', event.target.value)}
+        onChange={(event: React.ChangeEvent<HTMLInputElement>) => onChange('subtitle', event.target.value)}
       />
 
       <label className="field-label" htmlFor="report-address">
@@ -30,7 +37,7 @@ export default function GeneralInfoForm({ generalInfo, onChange }) {
         id="report-address"
         type="text"
         value={generalInfo.address}
-        onChange={(event) => onChange('address', event.target.value)}
+        onChange={(event: React.ChangeEvent<HTMLInputElement>) => onChange('address', event.target.value)}
       />
 
       <label className="field-label" htmlFor="report-description">
@@ -38,9 +45,9 @@ export default function GeneralInfoForm({ generalInfo, onChange }) {
       </label>
       <textarea
         id="report-description"
-        rows="3"
+        rows={3}
         value={generalInfo.description}
-        onChange={(event) => onChange('description', event.target.value)}
+        onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) => onChange('description', event.target.value)}
       />
 
       <label className="field-label" htmlFor="report-date">
@@ -50,7 +57,7 @@ export default function GeneralInfoForm({ generalInfo, onChange }) {
         id="report-date"
         type="date"
         value={generalInfo.surveyDate}
-        onChange={(event) => onChange('surveyDate', event.target.value)}
+        onChange={(event: React.ChangeEvent<HTMLInputElement>) => onChange('surveyDate', event.target.value)}
       />
 
       <label className="field-label" htmlFor="report-responsible">
@@ -60,7 +67,9 @@ export default function GeneralInfoForm({ generalInfo, onChange }) {
         id="report-responsible"
         type="text"
         value={generalInfo.responsible}
-        onChange={(event) => onChange('responsible', event.target.value)}
+        onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+          onChange('responsible', event.target.value)
+        }
       />
 
       <label className="field-label" htmlFor="report-process-number">
@@ -70,7 +79,9 @@ export default function GeneralInfoForm({ generalInfo, onChange }) {
         id="report-process-number"
         type="text"
         value={generalInfo.processNumber}
-        onChange={(event) => onChange('processNumber', event.target.value)}
+        onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+          onChange('processNumber', event.target.value)
+        }
       />
 
       <label className="checkbox-field" htmlFor="repeat-title">
@@ -78,7 +89,9 @@ export default function GeneralInfoForm({ generalInfo, onChange }) {
           id="repeat-title"
           type="checkbox"
           checked={generalInfo.repeatTitle}
-          onChange={(event) => onChange('repeatTitle', event.target.checked)}
+          onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+            onChange('repeatTitle', event.target.checked)
+          }
         />
         <span>Repetir titulo nas demais paginas</span>
       </label>
