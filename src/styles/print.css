@@ -211,6 +211,12 @@
     line-height: 1.05 !important;
   }
 
+  .embedded-signature-content .signature-role {
+    font-size: 9px !important;
+    line-height: 1.05 !important;
+    margin: 0 !important;
+  }
+
   .photo-section {
     display: flex !important;
     flex-direction: column !important;
@@ -305,6 +311,12 @@
   .signature-page-content .signature-registry {
     line-height: 1.05 !important;
     margin: 0 !important;
+  }
+
+  .signature-page-content .signature-role {
+    line-height: 1.05 !important;
+    margin: 0 !important;
+    font-size: 9px !important;
   }
 
   .page-preview-wrapper {

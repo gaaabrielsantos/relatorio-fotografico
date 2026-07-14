@@ -19,10 +19,13 @@ export default function SignaturePage({ signatures = [], embedded = false }) {
               )}
             </div>
             <div className="signature-line" />
-            <p className="signature-name">{signature.name || 'Nome do responsável'}</p>
-            {signature.registrationNumber && (
-              <p className="signature-registry">Registro: {signature.registrationNumber}</p>
-            )}
+            <div className="signature-details">
+              <p className="signature-name">{signature.name || 'Nome do responsável'}</p>
+              {signature.role && <p className="signature-role">{signature.role}</p>}
+              {signature.registrationNumber && (
+                <p className="signature-registry">{signature.registrationNumber}</p>
+              )}
+            </div>
           </article>
         ))}
       </div>

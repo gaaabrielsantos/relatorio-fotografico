@@ -4,25 +4,25 @@
   --app-bg: #bebebe;
   --paper: #ffffff;
   --ink: #1b211c;
-  --muted: #bebebe;
+  --muted: #696363;
   --line: #242424;
   --line-soft: #bebebe;
   --accent: #4dbe55;
   --danger: #bb1e10;
-  --sidebar: #71776d;
-  --sidebar-header: #4dbe55;
-  --card-bg: #ffffff;
+  --sidebar: #8ef34b;
+  --sidebar-header: #4dbe5400;
+  --card-bg: #ffffff00;
   --primary: #79ed91;
   --secondary: #698696;
-  --border: #bebebe;
+  --border: #bebebe00;
   --text-light: #ffffff;
   --text-dark: #1b211c;
-  --placeholder-color: #71776d;
+  --placeholder-color: #7e837a;
   --shadow-paper: 0 14px 34px rgba(0, 0, 0, 0.24);
 
   /* Report page section spacing controls */
   --space-header-info: 6px;
-  --space-info-photo: 5px;
+  --space-info-photo: 1px;
   --space-between-photos: 30px;
   --space-photo-signature: 20px;
   --space-signature-footer: 10px;
@@ -204,6 +204,7 @@ textarea {
 
 input[type='range'] {
   padding: 0;
+  accent-color: #ff7300;
 }
 
 .checkbox-field {
@@ -817,7 +818,7 @@ input[type='range'] {
 
 .signatures-grid {
   display: grid;
-  gap: 4px;
+  gap: 20px;
 }
 
 .signatures-1 {
@@ -853,13 +854,13 @@ input[type='range'] {
 }
 
 .signature-page-content .signatures-grid {
-  gap: 2px;
+  gap: 50px;
 }
 
 .signature-page-content .signature-card {
   min-height: 92px;
-  gap: 0;
-  padding: 1px 2px;
+  gap: 10px;
+  padding: 20px 2px;
 }
 
 .signature-page-content .signature-blank {
@@ -877,6 +878,11 @@ input[type='range'] {
 
 .signature-page-content .signature-name,
 .signature-page-content .signature-registry {
+  line-height: 1.05;
+  margin: 2px;
+}
+
+.signature-page-content .signature-role {
   line-height: 1.05;
   margin: 0;
 }
@@ -907,12 +913,27 @@ input[type='range'] {
   margin: 0 0 2px;
 }
 
+.signature-details {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+
 .signature-name,
 .signature-registry {
   margin: 0;
   text-align: center;
   font-size: 11px;
   line-height: 1.05;
+}
+
+.signature-role {
+  margin: 0;
+  text-align: center;
+  line-height: 1.05;
+  font-size: 10px;
+  font-weight: 400;
 }
 
 .signature-name {

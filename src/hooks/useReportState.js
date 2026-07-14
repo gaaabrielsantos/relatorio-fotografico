@@ -14,6 +14,7 @@ function createEmptySignature() {
   return {
     id: crypto.randomUUID(),
     name: '',
+    role: '',
     registrationNumber: '',
     signatureImageDataUrl: '',
     mode: 'physical',
@@ -63,9 +64,10 @@ function createPersistedReport(report) {
       ...report.generalInfo,
     },
     photos: report.photos.map(({ id, caption }) => ({ id, caption })),
-    signatures: report.signatures.map(({ id, name, registrationNumber, mode }) => ({
+    signatures: report.signatures.map(({ id, name, role, registrationNumber, mode }) => ({
       id,
       name,
+      role,
       registrationNumber,
       mode,
     })),
@@ -121,6 +123,7 @@ export function useReportState() {
       merged.signatures = merged.signatures.map((signature) => ({
         id: signature.id || crypto.randomUUID(),
         name: signature.name || '',
+        role: signature.role ?? '',
         registrationNumber: signature.registrationNumber || '',
         signatureImageDataUrl: signature.signatureImageDataUrl || '',
         mode: signature.mode === 'digital' ? 'digital' : 'physical',

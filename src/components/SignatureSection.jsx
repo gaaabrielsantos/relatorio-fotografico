@@ -91,6 +91,12 @@ export default function SignatureSection({
                   />
                   <input
                     type="text"
+                    placeholder="Cargo/Função"
+                    value={signature.role}
+                    onChange={(event) => onUpdate(signature.id, { role: event.target.value })}
+                  />
+                  <input
+                    type="text"
                     placeholder="Número de registro"
                     value={signature.registrationNumber}
                     onChange={(event) =>
@@ -113,10 +119,13 @@ export default function SignatureSection({
               )}
             </div>
             <div className="signature-line" />
-            <p className="signature-name">{signature.name || 'Nome do responsável'}</p>
-            {signature.registrationNumber && (
-              <p className="signature-registry">Registro: {signature.registrationNumber}</p>
-            )}
+            <div className="signature-details">
+              <p className="signature-name">{signature.name || 'Nome do responsável'}</p>
+              {signature.role && <p className="signature-role">{signature.role}</p>}
+              {signature.registrationNumber && (
+                <p className="signature-registry">{signature.registrationNumber}</p>
+              )}
+            </div>
           </article>
         ))}
       </div>
