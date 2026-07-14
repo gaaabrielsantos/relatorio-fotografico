@@ -10,6 +10,7 @@
     margin: 0;
     padding: 0;
     background: #ffffff;
+    font-family: 'Josefin Sans', Arial, sans-serif !important;
   }
 
   .no-print,
@@ -72,6 +73,33 @@
     position: relative !important;
   }
 
+  .page-header.report-header-full-width {
+    width: calc(100% + (2 * 8mm)) !important;
+    margin-left: -8mm !important;
+    margin-right: -8mm !important;
+    padding: 0 !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+  }
+
+  .page-footer.report-footer-full-width {
+    width: calc(100% + (2 * 8mm)) !important;
+    margin-left: -8mm !important;
+    margin-right: -8mm !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  .page-header-image,
+  .page-footer-image {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
   .a4-page:last-child {
     page-break-after: auto;
     break-after: auto;
@@ -86,6 +114,12 @@
     box-shadow: none !important;
     appearance: none !important;
     pointer-events: none !important;
+  }
+
+  .watermark-text,
+  .watermark-photo-placeholder,
+  .no-print-placeholder-page {
+    display: none !important;
   }
 
   .photo-section,
@@ -172,7 +206,6 @@
   }
 
   .embedded-signature-content .signature-name,
-  .embedded-signature-content .signature-role,
   .embedded-signature-content .signature-registry {
     font-size: 10px !important;
     line-height: 1.05 !important;
@@ -202,40 +235,44 @@
   }
 
   .page-footer {
-    height: 18mm !important;
-    min-height: 18mm !important;
-    max-height: 18mm !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
-    justify-content: center !important;
-    gap: var(--space-footer-page-number) !important;
+    justify-content: flex-end !important;
+    gap: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   .footer-slot {
     width: 100% !important;
-    height: 11.5mm !important;
-    min-height: 11.5mm !important;
-    max-height: 11.5mm !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
     display: flex !important;
-    align-items: center !important;
+    align-items: flex-end !important;
     justify-content: center !important;
-    overflow: hidden !important;
+    overflow: visible !important;
   }
 
   .page-footer-image {
-    max-width: 100% !important;
+    width: 100% !important;
+    max-width: none !important;
     height: auto !important;
-    max-height: 100% !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
+    max-height: none !important;
+    margin: 0 !important;
     object-fit: contain !important;
+    display: block !important;
   }
 
   .page-number {
     width: 100% !important;
     text-align: center !important;
     line-height: 1.1 !important;
+    margin-top: 10px !important;
   }
 
   .signature-page-content .signatures-grid {
@@ -243,26 +280,28 @@
   }
 
   .signature-page-content .signature-card {
-    min-height: 150px !important;
-    grid-template-rows: 62px auto auto auto !important;
-    gap: 1px !important;
-    padding: 5px 6px !important;
+    min-height: 92px !important;
+    gap: 0 !important;
+    padding: 1px 2px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
   }
 
   .signature-page-content .signature-blank {
-    height: 52px !important;
+    height: 46px !important;
   }
 
   .signature-page-content .signature-image {
-    max-height: 52px !important;
+    max-height: 46px !important;
   }
 
   .signature-page-content .signature-line {
-    margin-top: 1px !important;
+    margin-top: 0 !important;
+    margin-bottom: 1px !important;
   }
 
   .signature-page-content .signature-name,
-  .signature-page-content .signature-role,
   .signature-page-content .signature-registry {
     line-height: 1.05 !important;
     margin: 0 !important;

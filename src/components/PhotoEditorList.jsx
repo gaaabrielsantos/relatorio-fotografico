@@ -13,12 +13,21 @@ export default function PhotoEditorList({
     const file = event.target.files?.[0]
     if (!file) return
 
+    if (!file.type.startsWith('image/')) {
+      onError?.('Arquivo invalido. Use uma imagem JPG, PNG ou WEBP.')
+      event.target.value = ''
+      return
+    }
+
     try {
       const processed = await compressImageFile(file, { maxFileSizeMB: 12 })
-      onUpdate(photoId, { imageDataUrl: processed.dataUrl })
+      if (!processed?.dataUrl) {
+        throw new Error('Nao foi possivel processar a imagem.')
+      }
+      onUpdate(photoId, { image: processed.dataUrl })
       onError?.('')
     } catch (error) {
-      onError?.(error.message)
+      onError?.(error?.message || 'Nao foi possivel adicionar esta imagem. Tente novamente.')
     } finally {
       event.target.value = ''
     }
@@ -45,7 +54,7 @@ export default function PhotoEditorList({
             <div className="photo-editor-actions">
               <label className="btn secondary upload-label" htmlFor={`photo-upload-${photo.id}`}>
                 <ImagePlus size={16} />
-                <span>{photo.imageDataUrl ? 'Trocar imagem' : 'Enviar imagem'}</span>
+                <span>{photo.image ? 'Trocar imagem' : 'Enviar imagem'}</span>
               </label>
               <input
                 id={`photo-upload-${photo.id}`}
@@ -58,13 +67,9 @@ export default function PhotoEditorList({
               <button
                 type="button"
                 className="btn secondary"
-                onClick={() =>
-                  onUpdate(photo.id, {
-                    imageFit: photo.imageFit === 'contain' ? 'cover' : 'contain',
-                  })
-                }
+                onClick={() => onError?.('')}
               >
-                {photo.imageFit === 'contain' ? 'Preencher espaco' : 'Ajustar imagem'}
+                Preencher espaco
               </button>
 
               <button

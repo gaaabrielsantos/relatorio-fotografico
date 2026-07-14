@@ -1,6 +1,10 @@
 import ImageUpload from './ImageUpload'
 
 export default function HeaderUpload({ header, onUpdate, onError }) {
+  const widthPercent = Number.isFinite(Number(header?.widthPercent))
+    ? Number(header.widthPercent)
+    : 100
+
   return (
     <section className="editor-section">
       <h3>Cabecalho</h3>
@@ -12,16 +16,16 @@ export default function HeaderUpload({ header, onUpdate, onError }) {
         onRemove={() => onUpdate({ imageDataUrl: '' })}
       />
 
-      <label className="field-label" htmlFor="header-height">
-        Altura do cabecalho ({header.height} px)
+      <label className="field-label" htmlFor="header-width">
+        Largura do cabecalho: {widthPercent}%
       </label>
       <input
-        id="header-height"
+        id="header-width"
         type="range"
-        min="48"
-        max="140"
-        value={header.height}
-        onChange={(event) => onUpdate({ height: Number(event.target.value) })}
+        min="20"
+        max="100"
+        value={widthPercent}
+        onChange={(event) => onUpdate({ widthPercent: Number(event.target.value) })}
       />
 
       <label className="field-label" htmlFor="header-repeat">

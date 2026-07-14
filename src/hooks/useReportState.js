@@ -2,12 +2,11 @@ import { useEffect, useMemo, useState } from 'react'
 
 const STORAGE_KEY = 'relatorio-fotografico-v1'
 
-function createEmptyPhoto() {
+function createPhoto() {
   return {
     id: crypto.randomUUID(),
     caption: '',
-    imageDataUrl: '',
-    imageFit: 'contain',
+    image: null,
   }
 }
 
@@ -15,7 +14,6 @@ function createEmptySignature() {
   return {
     id: crypto.randomUUID(),
     name: '',
-    role: '',
     registrationNumber: '',
     signatureImageDataUrl: '',
     mode: 'physical',
@@ -27,12 +25,12 @@ function getInitialState() {
     nomenclature: 'Pagina',
     header: {
       imageDataUrl: '',
-      height: 72,
+      widthPercent: 100,
       repeatMode: 'all',
     },
     footer: {
       imageDataUrl: '',
-      widthPercent: 80,
+      widthPercent: 100,
       repeatMode: 'all',
     },
     generalInfo: {
@@ -45,8 +43,32 @@ function getInitialState() {
       processNumber: '',
       repeatTitle: false,
     },
-    photos: [createEmptyPhoto(), createEmptyPhoto()],
+    photos: [createPhoto(), createPhoto()],
     signatures: [createEmptySignature()],
+  }
+}
+
+function createPersistedReport(report) {
+  return {
+    nomenclature: report.nomenclature,
+    header: {
+      widthPercent: report.header.widthPercent,
+      repeatMode: report.header.repeatMode,
+    },
+    footer: {
+      widthPercent: report.footer.widthPercent,
+      repeatMode: report.footer.repeatMode,
+    },
+    generalInfo: {
+      ...report.generalInfo,
+    },
+    photos: report.photos.map(({ id, caption }) => ({ id, caption })),
+    signatures: report.signatures.map(({ id, name, registrationNumber, mode }) => ({
+      id,
+      name,
+      registrationNumber,
+      mode,
+    })),
   }
 }
 
@@ -65,14 +87,30 @@ export function useReportState() {
         generalInfo: { ...initial.generalInfo, ...(parsed.generalInfo || {}) },
       }
 
+      merged.header.widthPercent = Math.max(
+        20,
+        Math.min(
+          100,
+          Number(
+            merged.header?.widthPercent
+              ?? merged.header?.height
+              ?? 100,
+          ),
+        ),
+      )
+
+      merged.footer.widthPercent = Math.max(
+        20,
+        Math.min(100, Number(merged.footer?.widthPercent ?? 100)),
+      )
+
       if (!Array.isArray(merged.photos) || merged.photos.length === 0) {
-        merged.photos = [createEmptyPhoto(), createEmptyPhoto()]
+        merged.photos = [createPhoto(), createPhoto()]
       }
       merged.photos = merged.photos.map((photo) => ({
         id: photo.id || crypto.randomUUID(),
         caption: photo.caption || '',
-        imageDataUrl: photo.imageDataUrl || '',
-        imageFit: photo.imageFit === 'cover' ? 'cover' : 'contain',
+        image: null,
       }))
       if (!Array.isArray(merged.signatures) || merged.signatures.length === 0) {
         merged.signatures = [createEmptySignature()]
@@ -83,7 +121,6 @@ export function useReportState() {
       merged.signatures = merged.signatures.map((signature) => ({
         id: signature.id || crypto.randomUUID(),
         name: signature.name || '',
-        role: signature.role || '',
         registrationNumber: signature.registrationNumber || '',
         signatureImageDataUrl: signature.signatureImageDataUrl || '',
         mode: signature.mode === 'digital' ? 'digital' : 'physical',
@@ -97,16 +134,24 @@ export function useReportState() {
   const [errors, setErrors] = useState([])
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(report))
+    const dataToSave = createPersistedReport(report)
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave))
+    } catch (error) {
+      console.error('Erro ao salvar dados:', error)
+    }
   }, [report])
 
   const filledPhotos = useMemo(
-    () => report.photos.filter((photo) => Boolean(photo.imageDataUrl)),
+    () => report.photos.filter((photo) => Boolean(photo?.image)),
     [report.photos],
   )
 
   const pagesForPhotos = Math.ceil(filledPhotos.length / 2)
-  const totalPages = pagesForPhotos + 1
+  const lastPhotoPageSize = filledPhotos.length % 2
+  const hasPhotos = filledPhotos.length > 0
+  const hasEmbeddedSignaturePage = hasPhotos && lastPhotoPageSize === 1
+  const totalPages = pagesForPhotos + (hasEmbeddedSignaturePage ? 0 : 1)
 
   const updateGeneralInfo = (field, value) => {
     setReport((prev) => ({
@@ -136,7 +181,7 @@ export function useReportState() {
   const addPhoto = () => {
     setReport((prev) => ({
       ...prev,
-      photos: [...prev.photos, createEmptyPhoto()],
+      photos: [...prev.photos, createPhoto()],
     }))
   }
 
@@ -219,9 +264,6 @@ export function useReportState() {
     report.signatures.forEach((signature, index) => {
       if (!signature.name.trim()) {
         nextErrors.push(`Preencha o nome do responsavel ${index + 1}.`)
-      }
-      if (!signature.role.trim()) {
-        nextErrors.push(`Preencha o cargo ou funcao do responsavel ${index + 1}.`)
       }
     })
 

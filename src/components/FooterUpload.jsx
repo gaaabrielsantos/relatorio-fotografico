@@ -1,6 +1,10 @@
 import ImageUpload from './ImageUpload'
 
 export default function FooterUpload({ footer, onUpdate, onError }) {
+  const widthPercent = Number.isFinite(Number(footer?.widthPercent))
+    ? Number(footer.widthPercent)
+    : 100
+
   return (
     <section className="editor-section">
       <h3>Rodape</h3>
@@ -13,14 +17,14 @@ export default function FooterUpload({ footer, onUpdate, onError }) {
       />
 
       <label className="field-label" htmlFor="footer-width">
-        Largura do rodape: {footer.widthPercent}%
+        Largura do rodape: {widthPercent}%
       </label>
       <input
         id="footer-width"
         type="range"
-        min="10"
+        min="20"
         max="100"
-        value={footer.widthPercent}
+        value={widthPercent}
         onChange={(event) => onUpdate({ widthPercent: Number(event.target.value) })}
       />
 
@@ -29,7 +33,7 @@ export default function FooterUpload({ footer, onUpdate, onError }) {
           type="button"
           className="btn secondary"
           onClick={() => onUpdate({ widthPercent: 100 })}
-          disabled={footer.widthPercent === 100}
+          disabled={widthPercent === 100}
         >
           Usar largura total
         </button>

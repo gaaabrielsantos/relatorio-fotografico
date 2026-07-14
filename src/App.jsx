@@ -77,19 +77,24 @@ function App() {
   }, [])
 
   const validPhotos = useMemo(
-    () => report.photos.filter((photo) => Boolean(photo?.imageDataUrl)),
+    () => report.photos.filter((photo) => Boolean(photo?.image)),
     [report.photos],
   )
 
   const photoPages = useMemo(() => chunkPhotos(validPhotos), [validPhotos])
+  const shouldShowDraftPhotoPage = useMemo(() => validPhotos.length === 0, [validPhotos.length])
 
   const reportPages = useMemo(() => {
     const pages = []
     const hasPhotos = photoPages.length > 0
-    const lastPhotoPage = hasPhotos ? photoPages[photoPages.length - 1] : []
-    const shouldEmbedSignatureInLastPhotoPage = hasPhotos && lastPhotoPage.length === 1
+    const lastPhotoPage = photoPages.at(-1)
+    const shouldEmbedSignatureInLastPhotoPage = Boolean(hasPhotos && lastPhotoPage?.length === 1)
 
-    photoPages.forEach((items, index) => {
+    if (!hasPhotos && shouldShowDraftPhotoPage) {
+      pages.push({ type: 'draft-photo-placeholder' })
+    }
+
+    photoPages.forEach((items = [], index) => {
       const isLastPhotoPage = index === photoPages.length - 1
       pages.push({
         type: 'photos',
@@ -104,10 +109,24 @@ function App() {
     }
 
     return pages
-  }, [photoPages])
+  }, [photoPages, shouldShowDraftPhotoPage])
 
-  const getPageLabel = (pageIndex) => {
-    return `${report.nomenclature} ${pageIndex + 1}/${totalPages}`
+  const numberedPages = useMemo(
+    () => reportPages.filter((page) => page.type !== 'draft-photo-placeholder'),
+    [reportPages],
+  )
+
+  const getPageLabel = (page, pageIndex) => {
+    if (page.type === 'draft-photo-placeholder') {
+      return ''
+    }
+
+    const numberedIndex = reportPages
+      .slice(0, pageIndex + 1)
+      .filter((item) => item.type !== 'draft-photo-placeholder').length
+
+    const totalRenderedPages = numberedPages.length || totalPages
+    return `${report.nomenclature} ${numberedIndex}/${totalRenderedPages}`
   }
 
   const handleReset = () => {
@@ -169,7 +188,7 @@ function App() {
 
               return (
                 <div
-                  className="page-preview-wrapper"
+                  className={`page-preview-wrapper${page.type === 'draft-photo-placeholder' ? ' no-print-placeholder-page' : ''}`}
                   style={{
                     width: `${A4_WIDTH_PX * previewScale}px`,
                     height: `${A4_HEIGHT_PX * previewScale}px`,
@@ -178,12 +197,12 @@ function App() {
                 >
                   <A4Page
                     headerImage={report.header.imageDataUrl}
-                    headerHeight={report.header.height}
+                    headerWidthPercent={report.header.widthPercent}
                     showHeader={showHeader}
                     footerImage={report.footer.imageDataUrl}
                     footerWidthPercent={report.footer.widthPercent}
                     showFooter={showFooter}
-                    pageLabel={getPageLabel(pageIndex)}
+                    pageLabel={getPageLabel(page, pageIndex)}
                     previewScale={previewScale}
                   >
                     {page.type === 'photos' && (
@@ -195,6 +214,18 @@ function App() {
                         generalInfo={report.generalInfo}
                         signatures={report.signatures}
                         embedSignature={Boolean(page.embedSignature)}
+                      />
+                    )}
+                    {page.type === 'draft-photo-placeholder' && (
+                      <PhotoPage
+                        photos={[]}
+                        allPhotos={[]}
+                        showGeneralInfo
+                        showRepeatedTitle={false}
+                        generalInfo={report.generalInfo}
+                        signatures={[]}
+                        embedSignature={false}
+                        watermarkPhotoPlaceholder
                       />
                     )}
                     {page.type === 'signatures' && <SignaturePage signatures={report.signatures} />}
