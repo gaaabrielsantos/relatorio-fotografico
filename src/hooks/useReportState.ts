@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { readStorageJson, writeStorageJson } from '../utils/storageUtils'
+import defaultHeaderImage from '../assets/cabecalho.jpg'
+import defaultFooterImage from '../assets/rodape.png'
 import type {
   Nomenclature,
   PersistedReport,
@@ -37,12 +39,12 @@ function getInitialState(): ReportData {
   return {
     nomenclature: 'Pagina',
     header: {
-      imageDataUrl: '',
+      imageDataUrl: defaultHeaderImage,
       widthPercent: 100,
       repeatMode: 'all',
     },
     footer: {
-      imageDataUrl: '',
+      imageDataUrl: defaultFooterImage,
       widthPercent: 100,
       repeatMode: 'all',
     },
@@ -64,11 +66,15 @@ function getInitialState(): ReportData {
 function createPersistedReport(report: ReportData): PersistedReport {
   return {
     nomenclature: report.nomenclature,
+    headerImageRemoved: !report.header.imageDataUrl,
+    footerImageRemoved: !report.footer.imageDataUrl,
     header: {
+      imageDataUrl: report.header.imageDataUrl,
       widthPercent: report.header.widthPercent,
       repeatMode: report.header.repeatMode,
     },
     footer: {
+      imageDataUrl: report.footer.imageDataUrl,
       widthPercent: report.footer.widthPercent,
       repeatMode: report.footer.repeatMode,
     },
@@ -111,6 +117,10 @@ function asBoolean(value: unknown, fallback = false): boolean {
   return typeof value === 'boolean' ? value : fallback
 }
 
+function hasOwnKey(record: Record<string, unknown>, key: string): boolean {
+  return Object.prototype.hasOwnProperty.call(record, key)
+}
+
 function loadReportData(): ReportData {
   const parsed = readStorageJson(STORAGE_KEY)
   if (!parsed) {
@@ -122,6 +132,23 @@ function loadReportData(): ReportData {
   const header = asRecord(root.header)
   const footer = asRecord(root.footer)
   const generalInfo = asRecord(root.generalInfo)
+
+  const hasStoredHeaderImage = hasOwnKey(header, 'imageDataUrl')
+  const hasStoredFooterImage = hasOwnKey(footer, 'imageDataUrl')
+  const headerImageRemoved = asBoolean(root.headerImageRemoved, false)
+  const footerImageRemoved = asBoolean(root.footerImageRemoved, false)
+
+  const normalizedHeaderImage = headerImageRemoved
+    ? ''
+    : hasStoredHeaderImage
+      ? asString(header.imageDataUrl, '')
+      : defaultHeaderImage
+
+  const normalizedFooterImage = footerImageRemoved
+    ? ''
+    : hasStoredFooterImage
+      ? asString(footer.imageDataUrl, '')
+      : defaultFooterImage
 
   const loadedPhotos = Array.isArray(root.photos) ? root.photos : []
   const loadedSignatures = Array.isArray(root.signatures) ? root.signatures : []
@@ -165,12 +192,12 @@ function loadReportData(): ReportData {
   return {
     nomenclature: root.nomenclature === 'Folha' ? 'Folha' : initial.nomenclature,
     header: {
-      imageDataUrl: asString(header.imageDataUrl, ''),
+      imageDataUrl: normalizedHeaderImage,
       widthPercent: normalizedHeaderWidth,
       repeatMode: header.repeatMode === 'first' ? 'first' : 'all',
     },
     footer: {
-      imageDataUrl: asString(footer.imageDataUrl, ''),
+      imageDataUrl: normalizedFooterImage,
       widthPercent: normalizedFooterWidth,
       repeatMode: footer.repeatMode === 'first' ? 'first' : 'all',
     },

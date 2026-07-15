@@ -47,8 +47,10 @@ export interface ReportData {
 
 export interface PersistedReport {
   nomenclature: Nomenclature
-  header: Pick<ReportHeaderFooter, 'widthPercent' | 'repeatMode'>
-  footer: Pick<ReportHeaderFooter, 'widthPercent' | 'repeatMode'>
+  headerImageRemoved?: boolean
+  footerImageRemoved?: boolean
+  header: Pick<ReportHeaderFooter, 'imageDataUrl' | 'widthPercent' | 'repeatMode'>
+  footer: Pick<ReportHeaderFooter, 'imageDataUrl' | 'widthPercent' | 'repeatMode'>
   generalInfo: ReportGeneralInfo
   photos: Array<Pick<ReportPhoto, 'id' | 'caption'>>
   signatures: Array<
