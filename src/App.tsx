@@ -38,6 +38,7 @@ function App() {
     errors,
     totalPages,
     setErrors,
+    updateElaborationDateText,
     updateGeneralInfo,
     updateHeader,
     updateFooter,
@@ -168,7 +169,8 @@ function App() {
 
     try {
       await exportReportToPdf({
-        previewElement,
+        container: previewElement,
+        pageSelector: '.report-page',
         filename: fileName,
       })
     } catch {
@@ -199,6 +201,7 @@ function App() {
         <Sidebar
           report={report}
           errors={uiError ? [uiError, ...errors] : errors}
+          onElaborationDateChange={updateElaborationDateText}
           onGeneralInfoChange={updateGeneralInfo}
           onHeaderUpdate={updateHeader}
           onFooterUpdate={updateFooter}
@@ -249,6 +252,7 @@ function App() {
                           showGeneralInfo={page.photoPageIndex === 0}
                           showRepeatedTitle={page.photoPageIndex > 0 && report.generalInfo.repeatTitle}
                           generalInfo={report.generalInfo}
+                          elaborationDateText={report.elaborationDateText}
                           signatures={report.signatures}
                           embedSignature={Boolean(page.embedSignature)}
                         />
@@ -265,7 +269,16 @@ function App() {
                           watermarkPhotoPlaceholder
                         />
                       )}
-                      {page.type === 'signatures' && <SignaturePage signatures={report.signatures} />}
+                      {page.type === 'signatures' && (
+                        <>
+                          {report.elaborationDateText.trim() && (
+                            <section className="elaboration-date-section avoid-break">
+                              <p>{report.elaborationDateText}</p>
+                            </section>
+                          )}
+                          <SignaturePage signatures={report.signatures} />
+                        </>
+                      )}
                     </A4Page>
                   </div>
                 </div>

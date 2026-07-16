@@ -40,6 +40,7 @@ export interface ReportData {
   nomenclature: Nomenclature
   header: ReportHeaderFooter
   footer: ReportHeaderFooter
+  elaborationDateText: string
   generalInfo: ReportGeneralInfo
   photos: ReportPhoto[]
   signatures: ReportSignature[]
@@ -47,6 +48,7 @@ export interface ReportData {
 
 export interface PersistedReport {
   nomenclature: Nomenclature
+  elaborationDateText?: string
   headerImageRemoved?: boolean
   footerImageRemoved?: boolean
   header: Pick<ReportHeaderFooter, 'imageDataUrl' | 'widthPercent' | 'repeatMode'>

@@ -3,7 +3,8 @@ import jsPDF from 'jspdf'
 
 export interface ExportPdfOptions {
   filename: string
-  previewElement: HTMLElement
+  container: HTMLElement
+  pageSelector?: string
 }
 
 export async function waitForImages(element: HTMLElement): Promise<void> {
@@ -44,18 +45,26 @@ async function waitForRenderFrames(): Promise<void> {
 }
 
 export async function exportReportToPdf(options: ExportPdfOptions): Promise<void> {
-  const { filename, previewElement } = options
+  const { filename, container, pageSelector = '.report-page' } = options
 
   if ('fonts' in document) {
     await (document as Document & { fonts: FontFaceSet }).fonts.ready
   }
 
-  await waitForImages(previewElement)
+  await waitForImages(container)
   await waitForRenderFrames()
 
-  const pageNodes = Array.from(previewElement.querySelectorAll<HTMLElement>('.report-page')).filter(
+  const allPages = Array.from(container.querySelectorAll<HTMLElement>(pageSelector)).filter(
     (page) => !page.closest('.no-print-placeholder-page'),
   )
+
+  const pageNodes = allPages.filter((page) => {
+    const rect = page.getBoundingClientRect()
+    const computed = window.getComputedStyle(page)
+    const isHidden = computed.display === 'none' || computed.visibility === 'hidden'
+
+    return !isHidden && rect.width > 0 && rect.height > 0 && page.childElementCount > 0
+  })
 
   if (pageNodes.length === 0) {
     throw new Error('Nao foi possivel localizar paginas para exportacao.')

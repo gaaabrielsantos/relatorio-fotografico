@@ -709,6 +709,22 @@ input[type='range'] {
   margin-top: var(--space-photo-signature);
 }
 
+.elaboration-date-section {
+  width: 100%;
+  margin: 10px 0;
+  padding: 0;
+  text-align: center;
+  background: transparent;
+  border: none;
+}
+
+.elaboration-date-section p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.2;
+  font-weight: 400;
+}
+
 .embedded-signature-content {
   height: auto;
   min-height: 0;

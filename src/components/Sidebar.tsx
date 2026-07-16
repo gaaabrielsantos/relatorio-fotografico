@@ -21,6 +21,7 @@ import type {
 interface SidebarProps {
   report: ReportData
   errors: string[]
+  onElaborationDateChange: (value: string) => void
   onGeneralInfoChange: (field: keyof ReportGeneralInfo, value: string | boolean) => void
   onHeaderUpdate: (patch: Partial<ReportHeaderFooter>) => void
   onFooterUpdate: (patch: Partial<ReportHeaderFooter>) => void
@@ -41,6 +42,7 @@ interface SidebarProps {
 export default function Sidebar({
   report,
   errors,
+  onElaborationDateChange,
   onGeneralInfoChange,
   onHeaderUpdate,
   onFooterUpdate,
@@ -107,6 +109,27 @@ export default function Sidebar({
           onMove={onMovePhoto}
           onError={onError}
         />
+      </section>
+
+      <div className="sidebar-divider" aria-hidden="true" />
+
+      <section className="sidebar-group" aria-label="Data da elaboracao">
+        <h2 className="sidebar-group-title">Data da elaboracao</h2>
+        <section className="editor-section">
+          <h3>Data da elaboracao</h3>
+          <label className="field-label" htmlFor="elaboration-date-text">
+            Data da elaboracao do relatorio
+          </label>
+          <input
+            id="elaboration-date-text"
+            type="text"
+            value={report.elaborationDateText}
+            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+              onElaborationDateChange(event.target.value)
+            }
+            placeholder="Mairinque, 16 de Julho de 2026"
+          />
+        </section>
       </section>
 
       <div className="sidebar-divider" aria-hidden="true" />

@@ -8,6 +8,7 @@ interface PhotoPageProps {
   showGeneralInfo: boolean
   showRepeatedTitle: boolean
   generalInfo: ReportGeneralInfo
+  elaborationDateText?: string
   signatures?: ReportSignature[]
   embedSignature?: boolean
   watermarkPhotoPlaceholder?: boolean
@@ -25,6 +26,7 @@ export default function PhotoPage({
   showGeneralInfo,
   showRepeatedTitle,
   generalInfo,
+  elaborationDateText = '',
   signatures = [],
   embedSignature = false,
   watermarkPhotoPlaceholder = false,
@@ -103,6 +105,11 @@ export default function PhotoPage({
 
         {shouldEmbedSignature && (
           <div className="embedded-signature-wrapper avoid-break">
+            {elaborationDateText.trim() && (
+              <section className="elaboration-date-section avoid-break">
+                <p>{elaborationDateText}</p>
+              </section>
+            )}
             <SignaturePage signatures={signatures} embedded />
           </div>
         )}

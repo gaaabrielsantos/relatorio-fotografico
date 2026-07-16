@@ -48,6 +48,7 @@ function getInitialState(): ReportData {
       widthPercent: 100,
       repeatMode: 'all',
     },
+    elaborationDateText: '',
     generalInfo: {
       title: '',
       subtitle: '',
@@ -66,6 +67,7 @@ function getInitialState(): ReportData {
 function createPersistedReport(report: ReportData): PersistedReport {
   return {
     nomenclature: report.nomenclature,
+    elaborationDateText: report.elaborationDateText,
     headerImageRemoved: !report.header.imageDataUrl,
     footerImageRemoved: !report.footer.imageDataUrl,
     header: {
@@ -201,6 +203,7 @@ function loadReportData(): ReportData {
       widthPercent: normalizedFooterWidth,
       repeatMode: footer.repeatMode === 'first' ? 'first' : 'all',
     },
+    elaborationDateText: asString(root.elaborationDateText),
     generalInfo: {
       title: asString(generalInfo.title),
       subtitle: asString(generalInfo.subtitle),
@@ -244,6 +247,13 @@ export function useReportState() {
         ...prev.generalInfo,
         [field]: value,
       },
+    }))
+  }
+
+  const updateElaborationDateText = (value: string) => {
+    setReport((prev) => ({
+      ...prev,
+      elaborationDateText: value,
     }))
   }
 
@@ -362,6 +372,7 @@ export function useReportState() {
     totalPages,
     filledPhotos,
     setErrors,
+    updateElaborationDateText,
     updateGeneralInfo,
     updateHeader,
     updateFooter,
