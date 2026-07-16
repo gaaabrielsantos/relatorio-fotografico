@@ -11,7 +11,7 @@ export default function GeneralInfoForm({ generalInfo, onChange }: GeneralInfoFo
       <h3>Informacoes gerais</h3>
 
       <label className="field-label" htmlFor="report-title">
-        Titulo do relatorio *
+        Titulo da declaracao *
       </label>
       <input
         id="report-title"
@@ -48,40 +48,6 @@ export default function GeneralInfoForm({ generalInfo, onChange }: GeneralInfoFo
         rows={3}
         value={generalInfo.description}
         onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) => onChange('description', event.target.value)}
-      />
-
-      <label className="field-label" htmlFor="report-date">
-        Data da vistoria
-      </label>
-      <input
-        id="report-date"
-        type="date"
-        value={generalInfo.surveyDate}
-        onChange={(event: React.ChangeEvent<HTMLInputElement>) => onChange('surveyDate', event.target.value)}
-      />
-
-      <label className="field-label" htmlFor="report-responsible">
-        Responsavel
-      </label>
-      <input
-        id="report-responsible"
-        type="text"
-        value={generalInfo.responsible}
-        onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-          onChange('responsible', event.target.value)
-        }
-      />
-
-      <label className="field-label" htmlFor="report-process-number">
-        Processo / Convenio / Memorando
-      </label>
-      <input
-        id="report-process-number"
-        type="text"
-        value={generalInfo.processNumber}
-        onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-          onChange('processNumber', event.target.value)
-        }
       />
 
       <label className="checkbox-field" htmlFor="repeat-title">

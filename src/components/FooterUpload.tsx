@@ -16,7 +16,6 @@ export default function FooterUpload({ footer, onUpdate, onError }: FooterUpload
     <section className="editor-section">
       <h3>Rodape</h3>
       <ImageUpload
-        label="Rodape"
         value={footer.imageDataUrl}
         onChange={(imageDataUrl) => onUpdate({ imageDataUrl })}
         onError={onError}

@@ -7,22 +7,13 @@ import type {
   PersistedReport,
   ReportData,
   ReportGeneralInfo,
-  ReportPhoto,
   ReportSignature,
   ReportHeaderFooter,
 } from '../types/report'
 
-const STORAGE_KEY = 'relatorio-fotografico-v1'
+const STORAGE_KEY = 'declaracoes-v1'
 
 type ReportErrors = string[]
-
-function createPhoto(): ReportPhoto {
-  return {
-    id: crypto.randomUUID(),
-    caption: '',
-    image: null,
-  }
-}
 
 function createEmptySignature(): ReportSignature {
   return {
@@ -49,8 +40,9 @@ function getInitialState(): ReportData {
       repeatMode: 'all',
     },
     elaborationDateText: '',
+    declarationText: '',
     generalInfo: {
-      title: '',
+      title: 'Declaração',
       subtitle: '',
       address: '',
       description: '',
@@ -59,7 +51,7 @@ function getInitialState(): ReportData {
       processNumber: '',
       repeatTitle: false,
     },
-    photos: [createPhoto(), createPhoto()],
+    photos: [],
     signatures: [createEmptySignature()],
   }
 }
@@ -68,6 +60,7 @@ function createPersistedReport(report: ReportData): PersistedReport {
   return {
     nomenclature: report.nomenclature,
     elaborationDateText: report.elaborationDateText,
+    declarationText: report.declarationText,
     headerImageRemoved: !report.header.imageDataUrl,
     footerImageRemoved: !report.footer.imageDataUrl,
     header: {
@@ -167,14 +160,14 @@ function loadReportData(): ReportData {
 
   const nextPhotos = loadedPhotos.length > 0
     ? loadedPhotos.map((photoValue) => {
-      const photo = asRecord(photoValue)
-      return {
-        id: asString(photo.id, crypto.randomUUID()),
-        caption: asString(photo.caption),
-        image: null,
-      }
-    })
-    : [createPhoto(), createPhoto()]
+        const photo = asRecord(photoValue)
+        return {
+          id: asString(photo.id, crypto.randomUUID()),
+          caption: asString(photo.caption),
+          image: null,
+        }
+      })
+    : []
 
   const slicedSignatures = loadedSignatures.slice(0, 4)
   const nextSignatures = slicedSignatures.length > 0
@@ -204,6 +197,7 @@ function loadReportData(): ReportData {
       repeatMode: footer.repeatMode === 'first' ? 'first' : 'all',
     },
     elaborationDateText: asString(root.elaborationDateText),
+    declarationText: asString(root.declarationText ?? root.declarationTextLegacy),
     generalInfo: {
       title: asString(generalInfo.title),
       subtitle: asString(generalInfo.subtitle),
@@ -229,16 +223,7 @@ export function useReportState() {
     writeStorageJson(STORAGE_KEY, dataToSave)
   }, [report])
 
-  const filledPhotos = useMemo(
-    () => report.photos.filter((photo) => Boolean(photo?.image)),
-    [report.photos],
-  )
-
-  const pagesForPhotos = Math.ceil(filledPhotos.length / 2)
-  const lastPhotoPageSize = filledPhotos.length % 2
-  const hasPhotos = filledPhotos.length > 0
-  const hasEmbeddedSignaturePage = hasPhotos && lastPhotoPageSize === 1
-  const totalPages = pagesForPhotos + (hasEmbeddedSignaturePage ? 0 : 1)
+  const totalPages = 1
 
   const updateGeneralInfo = (field: UpdateGeneralInfoField, value: string | boolean) => {
     setReport((prev) => ({
@@ -257,6 +242,13 @@ export function useReportState() {
     }))
   }
 
+  const updateDeclarationText = (value: string) => {
+    setReport((prev) => ({
+      ...prev,
+      declarationText: value,
+    }))
+  }
+
   const updateHeader = (patch: HeaderFooterPatch) => {
     setReport((prev) => ({ ...prev, header: { ...prev.header, ...patch } }))
   }
@@ -270,42 +262,6 @@ export function useReportState() {
       ...prev,
       nomenclature: value === 'Folha' ? 'Folha' : 'Pagina',
     }))
-  }
-
-  const addPhoto = () => {
-    setReport((prev) => ({
-      ...prev,
-      photos: [...prev.photos, createPhoto()],
-    }))
-  }
-
-  const updatePhoto = (photoId: string, patch: UpdatePhotoPatch) => {
-    setReport((prev) => ({
-      ...prev,
-      photos: prev.photos.map((photo) =>
-        photo.id === photoId ? { ...photo, ...patch } : photo,
-      ),
-    }))
-  }
-
-  const removePhoto = (photoId: string) => {
-    setReport((prev) => {
-      const next = prev.photos.filter((photo) => photo.id !== photoId)
-      return { ...prev, photos: next }
-    })
-  }
-
-  const movePhoto = (photoId: string, direction: 'up' | 'down') => {
-    setReport((prev) => {
-      const idx = prev.photos.findIndex((photo) => photo.id === photoId)
-      if (idx < 0) return prev
-      const targetIdx = direction === 'up' ? idx - 1 : idx + 1
-      if (targetIdx < 0 || targetIdx >= prev.photos.length) return prev
-      const photos = [...prev.photos]
-      const [item] = photos.splice(idx, 1)
-      photos.splice(targetIdx, 0, item)
-      return { ...prev, photos }
-    })
   }
 
   const addSignature = () => {
@@ -343,13 +299,13 @@ export function useReportState() {
     const nextErrors = []
 
     if (!report.generalInfo.title.trim()) {
-      nextErrors.push('Preencha o titulo do relatorio.')
+      nextErrors.push('Preencha o titulo da declaracao.')
     }
     if (!report.generalInfo.address.trim()) {
       nextErrors.push('Preencha o endereco.')
     }
-    if (filledPhotos.length === 0) {
-      nextErrors.push('Insira ao menos uma fotografia com imagem.')
+    if (!report.declarationText.trim()) {
+      nextErrors.push('Preencha o texto da declaracao.')
     }
     if (report.signatures.length === 0) {
       nextErrors.push('Insira ao menos um responsavel para assinatura.')
@@ -368,19 +324,14 @@ export function useReportState() {
   return {
     report,
     errors,
-    pagesForPhotos,
     totalPages,
-    filledPhotos,
     setErrors,
     updateElaborationDateText,
+    updateDeclarationText,
     updateGeneralInfo,
     updateHeader,
     updateFooter,
     updateNomenclature,
-    addPhoto,
-    updatePhoto,
-    removePhoto,
-    movePhoto,
     addSignature,
     updateSignature,
     removeSignature,

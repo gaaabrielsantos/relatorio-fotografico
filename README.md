@@ -1,19 +1,19 @@
-# Relatório Fotográfico
+# Declarações
 
 Desenvolvi este projeto pensando no dia a dia do meu trabalho atual.
 
-A criação de relatórios fotográficos é uma tarefa que pode acabar sendo repetitiva e trabalhosa, principalmente quando é necessário organizar imagens, legendas, informações do serviço, responsáveis técnicos e manter um padrão entre todas as páginas.
+Este projeto organiza declarações e termos de responsabilidade com visualização em páginas A4, mantendo cabeçalho, rodapé, assinaturas e exportação em PDF.
 
 A ideia deste projeto foi deixar esse processo um pouco mais automatizado, padronizado e coerente.
 
-Com a aplicação, é possível preencher as informações do relatório, adicionar as fotografias, inserir legendas, configurar cabeçalho, rodapé e assinaturas, além de visualizar o resultado em formato A4 antes de imprimir ou salvar em PDF.
+Com a aplicação, é possível preencher as informações gerais, escrever o texto da declaração, configurar cabeçalho, rodapé e assinaturas, além de visualizar o resultado em formato A4 antes de imprimir ou salvar em PDF.
 
 ## Funcionalidades
 
-- Cadastro das informações gerais do relatório
+- Cadastro das informações gerais da declaração
 - Upload de cabeçalho e rodapé
-- Adição de fotografias com legenda
-- Organização automática das fotos nas páginas
+- Edição do texto da declaração
+- Paginação automática do texto nas páginas
 - Cadastro de responsáveis técnicos
 - Assinatura física ou digital
 - Numeração automática das folhas
@@ -29,18 +29,8 @@ Com a aplicação, é possível preencher as informações do relatório, adicio
 
 ## Como executar
 
-Instale as dependências:
+Instale as dependências com `npm install`.
 
-```bash
-npm install
+Inicie o projeto com `npm run dev`.
 
-Inicie o projeto:
-
-npm run dev
-
-Para gerar a versão de produção:
-
-npm run build
-Publicação
-
-O projeto também está sendo publicado na Vercel para facilitar o acesso e permitir o uso direto pelo navegador.
+Para gerar a versão de produção, use `npm run build`.

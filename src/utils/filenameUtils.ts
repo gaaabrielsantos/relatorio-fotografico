@@ -11,7 +11,7 @@ export function sanitizeFilename(value: string): string {
 export function createPdfFilename(reportTitle: string): string {
   const baseName = sanitizeFilename(reportTitle)
   if (!baseName) {
-    return 'Relatorio_Fotografico.pdf'
+    return 'Declaracao.pdf'
   }
-  return `Relatorio_Fotografico_${baseName}.pdf`
+  return `Declaracao_${baseName}.pdf`
 }

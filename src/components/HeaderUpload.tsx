@@ -16,7 +16,6 @@ export default function HeaderUpload({ header, onUpdate, onError }: HeaderUpload
     <section className="editor-section">
       <h3>Cabecalho</h3>
       <ImageUpload
-        label="Cabecalho"
         value={header.imageDataUrl}
         onChange={(imageDataUrl: string) => onUpdate({ imageDataUrl })}
         onError={onError}

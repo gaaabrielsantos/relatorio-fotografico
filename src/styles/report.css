@@ -136,14 +136,6 @@ select:focus {
   display: block;
 }
 
-.sidebar-group-title {
-  margin: 12px 0 6px;
-  font-size: 14px;
-  font-weight: 700;
-  text-align: center;
-  color: var(--text-dark);
-}
-
 aside.sidebar .sidebar-divider {
   width: calc(100% - 60px);
   max-width: calc(100% - 60px);
@@ -548,16 +540,16 @@ input[type='range'] {
 
 .page-body {
   min-height: 0;
-  overflow: hidden;
+  overflow: visible;
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
 }
 
-.photo-page-content {
+.declaration-page-content {
   display: flex;
   flex-direction: column;
-  flex: 1;
+  flex: 1 1 auto;
   min-height: 0;
 }
 
@@ -634,14 +626,14 @@ input[type='range'] {
   border: none;
   outline: none;
   box-shadow: none;
-  padding: 6px;
+  padding: 15px 0;
   margin-bottom: var(--space-info-photo);
   text-align: center;
   flex: 0 0 auto;
 }
 
 .general-info-box h2 {
-  margin: 0;
+  margin: 0;;
   font-size: 14px;
 }
 
@@ -655,15 +647,73 @@ input[type='range'] {
 .general-info-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 2px 8px;
+  gap: 10px 10px;
   justify-items: center;
 }
 
 .general-info-grid p,
 .general-info-description {
   margin: 0;
+  padding: 5px;
   font-size: 10px;
   line-height: 1.25;
+}
+
+.declaration-content {
+  width: 100%;
+  margin: 0;
+  padding: 20px 50px 10px;
+  box-sizing: border-box;
+  background: transparent;
+  border: none;
+  flex: 0 0 auto;
+  min-height: 0;
+}
+
+.declaration-body {
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  font-size: 12pt;
+  line-height: 1.6;
+  text-align: justify;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  color: #000000;
+}
+
+.declaration-signature-wrapper {
+  margin-top: 30px;
+  flex: 0 0 auto;
+}
+
+.declaration-placeholder {
+  margin: 0;
+  font-size: 11px;
+  color: var(--muted);
+  text-align: center;
+}
+
+aside.sidebar .declaration-textarea {
+  width: 100%;
+  min-height: 320px;
+  box-sizing: border-box;
+  padding: 14px;
+  background: #f2f2f2;
+  color: #1b211c;
+  border: 1px solid #d2d2d2;
+  border-radius: 5px;
+  resize: vertical;
+  line-height: 1.6;
+  text-align: left;
+}
+
+aside.sidebar .declaration-textarea:focus {
+  outline: none;
+  background: #ffffff;
+  border-color: #698696;
+  box-shadow: 0 0 0 2px rgba(105, 134, 150, 0.15);
 }
 
 .watermark-text {
@@ -687,28 +737,6 @@ input[type='range'] {
   font-size: 13px;
 }
 
-.photos-vertical {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-between-photos);
-  flex: 1;
-  min-height: 0;
-}
-
-.photos-vertical-with-signature {
-  flex: 0 0 auto;
-}
-
-.photos-vertical-with-signature .photo-section {
-  flex: 0 0 calc(50% - (var(--space-between-photos) / 2));
-  min-height: 0;
-  max-height: calc(50% - (var(--space-between-photos) / 2));
-}
-
-.embedded-signature-wrapper {
-  margin-top: var(--space-photo-signature);
-}
-
 .elaboration-date-section {
   width: 100%;
   margin: 10px 0;
@@ -723,128 +751,6 @@ input[type='range'] {
   font-size: 12px;
   line-height: 1.2;
   font-weight: 400;
-}
-
-.embedded-signature-content {
-  height: auto;
-  min-height: 0;
-  max-height: none;
-  padding: 6px;
-}
-
-.embedded-signature-title {
-  margin-bottom: 6px;
-  font-size: 14px;
-}
-
-.embedded-signature-content .signatures-grid {
-  gap: 8px;
-}
-
-.embedded-signature-content .signature-card {
-  min-height: 120px;
-  grid-template-rows: 44px auto auto auto;
-  gap: 1px;
-  padding: 4px 5px;
-}
-
-.embedded-signature-content .signature-blank {
-  height: 36px;
-}
-
-.embedded-signature-content .signature-image {
-  max-height: 36px;
-}
-
-.embedded-signature-content .signature-name,
-.embedded-signature-content .signature-registry {
-  font-size: 10px;
-  line-height: 1.05;
-}
-
-.photo-section {
-  border: none;
-  outline: none;
-  box-shadow: none;
-  background: #ffffff;
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 0;
-  min-height: 0;
-  max-height: 100%;
-}
-
-.photo-header {
-  border-bottom: none;
-  padding: 3px 5px;
-  min-height: 24px;
-  max-height: 32px;
-  flex: 0 0 auto;
-}
-
-.photo-header h4 {
-  margin: 0;
-  font-size: 11px;
-  line-height: 1.25;
-  font-weight: 700;
-  text-align: center;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.photo-frame {
-  background: #ffffff;
-  border-top: none;
-  min-height: 0;
-  max-height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: 1 1 auto;
-  overflow: hidden;
-}
-
-.photo-image {
-  width: 100%;
-  height: 100%;
-  max-height: 100%;
-  background: #ffffff;
-}
-
-.photo-image.fit-contain {
-  object-fit: contain;
-}
-
-.photo-image.fit-cover {
-  object-fit: cover;
-}
-
-.photo-placeholder {
-  color: var(--secondary);
-  font-size: 12px;
-}
-
-.watermark-photo-placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: var(--muted);
-  background: var(--card-bg);
-  text-align: center;
-  gap: 6px;
-}
-
-.watermark-photo-placeholder svg {
-  opacity: 0.5;
-}
-
-.watermark-photo-placeholder p,
-.watermark-photo-placeholder small {
-  margin: 0;
 }
 
 .map-page-content {
@@ -890,7 +796,8 @@ input[type='range'] {
   outline: none;
   box-shadow: none;
   padding: 8px;
-  height: 100%;
+  height: auto;
+  flex: 0 0 auto;
 }
 
 .signatures-grid {
