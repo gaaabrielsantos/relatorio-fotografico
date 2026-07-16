@@ -5,7 +5,7 @@ import Sidebar from './components/Sidebar'
 import SignaturePage from './components/SignaturePage'
 import { useReportState } from './hooks/useReportState'
 import { createPdfFilename } from './utils/filenameUtils'
-import { exportReportToPdf, waitForImages } from './utils/exportPdf'
+import { exportReportToPdf } from './utils/exportPdf'
 import type { ReportPhoto } from './types/report'
 import './styles/report.css'
 import './styles/print.css'
@@ -56,7 +56,8 @@ function App() {
   const [uiError, setUiError] = useState<string>('')
   const [isExporting, setIsExporting] = useState<boolean>(false)
   const [previewScale, setPreviewScale] = useState(1)
-  const previewRef = useRef<HTMLElement | null>(null)
+  const previewPanelRef = useRef<HTMLElement | null>(null)
+  const previewPagesRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     if (!report.generalInfo.title.trim()) {
@@ -67,7 +68,7 @@ function App() {
   }, [report.generalInfo.title])
 
   useEffect(() => {
-    const panel = previewRef.current
+    const panel = previewPanelRef.current
     if (!panel) return
 
     const recalculateScale = () => {
@@ -155,7 +156,7 @@ function App() {
 
     validateBeforeExport()
 
-    const previewElement = previewRef.current
+    const previewElement = previewPagesRef.current
     if (!previewElement) {
       setUiError('Nao foi possivel localizar o relatorio para exportacao.')
       return
@@ -166,13 +167,8 @@ function App() {
     const fileName = createPdfFilename(report.generalInfo.title)
 
     try {
-      if ('fonts' in document) {
-        await (document as Document & { fonts: FontFaceSet }).fonts.ready
-      }
-      await waitForImages(previewElement)
-
       await exportReportToPdf({
-        element: previewElement,
+        previewElement,
         filename: fileName,
       })
     } catch {
@@ -220,8 +216,8 @@ function App() {
           onError={handleError}
         />
 
-        <section className="report-preview preview-panel preview" id="report-preview" ref={previewRef}>
-          <div className="preview-content report-pages">
+        <section className="report-preview preview-panel preview" id="report-preview" ref={previewPanelRef}>
+          <div className="preview-content report-pages" ref={previewPagesRef}>
             {reportPages.map((page, pageIndex) => {
               const firstPage = pageIndex === 0
               const showHeader = report.header.repeatMode === 'all' || firstPage
@@ -236,41 +232,42 @@ function App() {
                   }}
                   key={`${page.type}-${pageIndex}`}
                 >
-                  <A4Page
-                    headerImage={report.header.imageDataUrl}
-                    headerWidthPercent={report.header.widthPercent}
-                    showHeader={showHeader}
-                    footerImage={report.footer.imageDataUrl}
-                    footerWidthPercent={report.footer.widthPercent}
-                    showFooter={showFooter}
-                    pageLabel={getPageLabel(page, pageIndex)}
-                    previewScale={previewScale}
-                  >
-                    {page.type === 'photos' && (
-                      <PhotoPage
-                        photos={page.items}
-                        allPhotos={validPhotos}
-                        showGeneralInfo={page.photoPageIndex === 0}
-                        showRepeatedTitle={page.photoPageIndex > 0 && report.generalInfo.repeatTitle}
-                        generalInfo={report.generalInfo}
-                        signatures={report.signatures}
-                        embedSignature={Boolean(page.embedSignature)}
-                      />
-                    )}
-                    {page.type === 'draft-photo-placeholder' && (
-                      <PhotoPage
-                        photos={[]}
-                        allPhotos={[]}
-                        showGeneralInfo
-                        showRepeatedTitle={false}
-                        generalInfo={report.generalInfo}
-                        signatures={[]}
-                        embedSignature={false}
-                        watermarkPhotoPlaceholder
-                      />
-                    )}
-                    {page.type === 'signatures' && <SignaturePage signatures={report.signatures} />}
-                  </A4Page>
+                  <div style={{ transform: `scale(${previewScale})`, transformOrigin: 'top left' }}>
+                    <A4Page
+                      headerImage={report.header.imageDataUrl}
+                      headerWidthPercent={report.header.widthPercent}
+                      showHeader={showHeader}
+                      footerImage={report.footer.imageDataUrl}
+                      footerWidthPercent={report.footer.widthPercent}
+                      showFooter={showFooter}
+                      pageLabel={getPageLabel(page, pageIndex)}
+                    >
+                      {page.type === 'photos' && (
+                        <PhotoPage
+                          photos={page.items}
+                          allPhotos={validPhotos}
+                          showGeneralInfo={page.photoPageIndex === 0}
+                          showRepeatedTitle={page.photoPageIndex > 0 && report.generalInfo.repeatTitle}
+                          generalInfo={report.generalInfo}
+                          signatures={report.signatures}
+                          embedSignature={Boolean(page.embedSignature)}
+                        />
+                      )}
+                      {page.type === 'draft-photo-placeholder' && (
+                        <PhotoPage
+                          photos={[]}
+                          allPhotos={[]}
+                          showGeneralInfo
+                          showRepeatedTitle={false}
+                          generalInfo={report.generalInfo}
+                          signatures={[]}
+                          embedSignature={false}
+                          watermarkPhotoPlaceholder
+                        />
+                      )}
+                      {page.type === 'signatures' && <SignaturePage signatures={report.signatures} />}
+                    </A4Page>
+                  </div>
                 </div>
               )
             })}

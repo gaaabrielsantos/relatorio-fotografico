@@ -30,7 +30,7 @@ export default function A4Page({
     <article
       className="a4-page report-page avoid-break"
       style={{
-        transform: `scale(${previewScale})`,
+        transform: 'none',
         transformOrigin: 'top left',
       }}
     >

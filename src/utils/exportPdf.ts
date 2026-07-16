@@ -1,8 +1,9 @@
-import html2pdf from 'html2pdf.js'
+import html2canvas from 'html2canvas'
+import jsPDF from 'jspdf'
 
 export interface ExportPdfOptions {
   filename: string
-  element: HTMLElement
+  previewElement: HTMLElement
 }
 
 export async function waitForImages(element: HTMLElement): Promise<void> {
@@ -12,7 +13,7 @@ export async function waitForImages(element: HTMLElement): Promise<void> {
     images.map(
       (image) =>
         new Promise<void>((resolve) => {
-          if (image.complete) {
+          if (image.complete && image.naturalWidth > 0) {
             resolve()
             return
           }
@@ -36,9 +37,23 @@ export async function waitForImages(element: HTMLElement): Promise<void> {
   )
 }
 
+async function waitForRenderFrames(): Promise<void> {
+  await new Promise<void>((resolve) =>
+    requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+  )
+}
+
 export async function exportReportToPdf(options: ExportPdfOptions): Promise<void> {
-  const { filename, element } = options
-  const pageNodes = Array.from(element.querySelectorAll<HTMLElement>('.report-page')).filter(
+  const { filename, previewElement } = options
+
+  if ('fonts' in document) {
+    await (document as Document & { fonts: FontFaceSet }).fonts.ready
+  }
+
+  await waitForImages(previewElement)
+  await waitForRenderFrames()
+
+  const pageNodes = Array.from(previewElement.querySelectorAll<HTMLElement>('.report-page')).filter(
     (page) => !page.closest('.no-print-placeholder-page'),
   )
 
@@ -46,33 +61,41 @@ export async function exportReportToPdf(options: ExportPdfOptions): Promise<void
     throw new Error('Nao foi possivel localizar paginas para exportacao.')
   }
 
-  const exportOptions = {
-    margin: 0,
-    filename,
-    image: {
-      type: 'jpeg',
-      quality: 0.98,
-    },
-    html2canvas: {
+  const pdf = new jsPDF({
+    orientation: 'portrait',
+    unit: 'mm',
+    format: 'a4',
+    compress: true,
+  })
+
+  for (let index = 0; index < pageNodes.length; index += 1) {
+    const page = pageNodes[index]
+    const width = Math.ceil(page.offsetWidth)
+    const height = Math.ceil(page.offsetHeight)
+
+    const canvas = await html2canvas(page, {
       scale: 2,
       useCORS: true,
+      allowTaint: true,
       backgroundColor: '#ffffff',
       logging: false,
+      width,
+      height,
+      windowWidth: width,
+      windowHeight: height,
       scrollX: 0,
       scrollY: 0,
-      windowWidth: element.scrollWidth,
-    },
-    jsPDF: {
-      unit: 'mm',
-      format: 'a4',
-      orientation: 'portrait',
-    },
-    pagebreak: {
-      mode: ['css', 'legacy'] as const,
-      before: '.report-page:not(:first-child)',
-      avoid: ['.photo-section', '.signature-card', '.page-header', '.page-footer'],
-    },
+      removeContainer: true,
+    })
+
+    const imageData = canvas.toDataURL('image/jpeg', 0.98)
+
+    if (index > 0) {
+      pdf.addPage('a4', 'portrait')
+    }
+
+    pdf.addImage(imageData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST')
   }
 
-  await html2pdf().set(exportOptions).from(element).save()
+  pdf.save(filename)
 }
