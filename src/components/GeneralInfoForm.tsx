@@ -8,7 +8,6 @@ interface GeneralInfoFormProps {
 export default function GeneralInfoForm({ generalInfo, onChange }: GeneralInfoFormProps) {
   return (
     <section className="editor-section">
-      <h3>Informacoes gerais</h3>
 
       <label className="field-label" htmlFor="report-title">
         Titulo do relatorio *

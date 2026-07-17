@@ -193,9 +193,6 @@ function App() {
 
   return (
     <div className="app-shell">
-      <header className="app-topbar no-print">
-        <h2>Relatorio Fotografico</h2>
-      </header>
 
       <main className="app-content main-layout">
         <Sidebar

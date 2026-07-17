@@ -49,32 +49,6 @@ export default function SignatureSection({
           <article className="signature-card avoid-break" key={signature.id}>
             {editable && (
               <>
-                <div className="signature-modes no-print">
-                  <label className="checkbox-field" htmlFor={`physical-${signature.id}`}>
-                    <input
-                      id={`physical-${signature.id}`}
-                      type="radio"
-                      name={`mode-${signature.id}`}
-                      checked={signature.mode === 'physical'}
-                      onChange={(_event: React.ChangeEvent<HTMLInputElement>) =>
-                        onUpdate(signature.id, { mode: 'physical' })
-                      }
-                    />
-                    <span>Assinatura fisica</span>
-                  </label>
-                  <label className="checkbox-field" htmlFor={`digital-${signature.id}`}>
-                    <input
-                      id={`digital-${signature.id}`}
-                      type="radio"
-                      name={`mode-${signature.id}`}
-                      checked={signature.mode === 'digital'}
-                      onChange={(_event: React.ChangeEvent<HTMLInputElement>) =>
-                        onUpdate(signature.id, { mode: 'digital' })
-                      }
-                    />
-                    <span>Assinatura digital</span>
-                  </label>
-                </div>
 
                 <div className="signature-upload no-print">
                   <label className="btn secondary upload-label" htmlFor={`sig-upload-${signature.id}`}>

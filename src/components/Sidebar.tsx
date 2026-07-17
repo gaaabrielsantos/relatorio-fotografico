@@ -79,13 +79,11 @@ export default function Sidebar({
       )}
 
       <section className="sidebar-group" aria-label="Relatorio">
-        <h2 className="sidebar-group-title">Relatorio</h2>
       </section>
 
       <div className="sidebar-divider" aria-hidden="true" />
 
       <section className="sidebar-group" aria-label="Edicao de pagina">
-        <h2 className="sidebar-group-title">Edicao de pagina</h2>
         <HeaderUpload header={report.header} onUpdate={onHeaderUpdate} onError={onError} />
         <FooterUpload footer={report.footer} onUpdate={onFooterUpdate} onError={onError} />
       </section>
@@ -93,14 +91,13 @@ export default function Sidebar({
       <div className="sidebar-divider" aria-hidden="true" />
 
       <section className="sidebar-group" aria-label="Informacoes gerais">
-        <h2 className="sidebar-group-title">Informacoes gerais</h2>
+        <h2 className="sidebar-group-title">INFORMAÇÕES GERAIS</h2>
         <GeneralInfoForm generalInfo={report.generalInfo} onChange={onGeneralInfoChange} />
       </section>
 
       <div className="sidebar-divider" aria-hidden="true" />
 
       <section className="sidebar-group" aria-label="Fotos">
-        <h2 className="sidebar-group-title">Fotos</h2>
         <PhotoEditorList
           photos={report.photos}
           onAddPhoto={onAddPhoto}
@@ -114,7 +111,6 @@ export default function Sidebar({
       <div className="sidebar-divider" aria-hidden="true" />
 
       <section className="sidebar-group" aria-label="Data da elaboracao">
-        <h2 className="sidebar-group-title">Data da elaboracao</h2>
         <section className="editor-section">
           <h3>Data da elaboracao</h3>
           <label className="field-label" htmlFor="elaboration-date-text">
@@ -134,8 +130,7 @@ export default function Sidebar({
 
       <div className="sidebar-divider" aria-hidden="true" />
 
-      <section className="sidebar-group" aria-label="Assinaturas">
-        <h2 className="sidebar-group-title">Assinaturas</h2>
+      <section className="sidebar-group" aria-label="">
         <SignatureSection
           signatures={report.signatures}
           onAdd={onAddSignature}
@@ -149,7 +144,6 @@ export default function Sidebar({
       <div className="sidebar-divider" aria-hidden="true" />
 
       <section className="sidebar-group" aria-label="Configuracoes e exportacoes">
-        <h2 className="sidebar-group-title">Configuracoes e exportacoes</h2>
         <section className="editor-section">
           <h3>Configuracoes</h3>
           <label className="field-label" htmlFor="nomenclature">
@@ -170,14 +164,6 @@ export default function Sidebar({
         <div className="sidebar-actions">
           <button
             type="button"
-            className="btn warning"
-            onClick={(_event: React.MouseEvent<HTMLButtonElement>) => onReset()}
-          >
-            <Eraser size={16} />
-            <span>Novo relatorio</span>
-          </button>
-          <button
-            type="button"
             className="btn primary"
             onClick={(_event: React.MouseEvent<HTMLButtonElement>) => {
               void onExport()
@@ -187,13 +173,13 @@ export default function Sidebar({
             <Printer size={16} />
             <span>{isExporting ? 'Gerando PDF...' : 'Exportar relatorio em PDF'}</span>
           </button>
-          <button type="button" className="btn ghost" disabled>
-            <FilePlus2 size={16} />
-            <span>Salvamento local automatico ativo</span>
-          </button>
-          <button type="button" className="btn ghost" disabled>
-            <FileText size={16} />
-            <span>Pronto para impressao A4</span>
+          <button
+            type="button"
+            className="btn warning"
+            onClick={(_event: React.MouseEvent<HTMLButtonElement>) => onReset()}
+          >
+            <Eraser size={16} />
+            <span>Novo relatorio</span>
           </button>
         </div>
       </section>
