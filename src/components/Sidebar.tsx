@@ -144,23 +144,6 @@ export default function Sidebar({
       <div className="sidebar-divider" aria-hidden="true" />
 
       <section className="sidebar-group" aria-label="Configuracoes e exportacoes">
-        <section className="editor-section">
-          <h3>Configuracoes</h3>
-          <label className="field-label" htmlFor="nomenclature">
-            Nomenclatura da pagina
-          </label>
-          <select
-            id="nomenclature"
-            value={report.nomenclature}
-            onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
-              onNomenclatureChange(event.target.value as Nomenclature)
-            }
-          >
-            <option value="Pagina">Pagina</option>
-            <option value="Folha">Folha</option>
-          </select>
-        </section>
-
         <div className="sidebar-actions">
           <button
             type="button"

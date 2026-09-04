@@ -34,8 +34,19 @@ export default function PhotoEditorList({
       if (!processed?.dataUrl) {
         throw new Error('Nao foi possivel processar a imagem.')
       }
-      onUpdate(photoId, { image: processed.dataUrl })
-      onError?.('')
+
+      const image = new Image()
+      const imageUrl = processed.dataUrl
+      image.onload = () => {
+        const orientation = image.naturalHeight >= image.naturalWidth ? 'portrait' : 'landscape'
+        onUpdate(photoId, { image: imageUrl, orientation })
+        onError?.('')
+      }
+      image.onerror = () => {
+        onUpdate(photoId, { image: imageUrl, orientation: 'portrait' })
+        onError?.('')
+      }
+      image.src = imageUrl
     } catch (error) {
       onError?.(error instanceof Error ? error.message : 'Nao foi possivel adicionar esta imagem. Tente novamente.')
     } finally {

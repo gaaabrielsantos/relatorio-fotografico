@@ -573,6 +573,7 @@ input[type='range'] {
   flex-direction: column;
   flex: 1;
   min-height: 0;
+  height: 100%;
 }
 
 .page-footer {
@@ -707,6 +708,50 @@ input[type='range'] {
   gap: var(--space-between-photos);
   flex: 1;
   min-height: 0;
+  height: 100%;
+}
+
+.photo-row {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: var(--space-between-photos);
+  width: 100%;
+  min-height: 0;
+}
+
+.photo-row--stacked {
+  height: calc((100% - var(--space-between-photos)) / 2);
+}
+
+.photo-row--stacked-landscape {
+  height: calc((100% - var(--space-between-photos)) / 2);
+}
+
+.photo-row--portrait-pair .photo-section {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: calc(50% - (var(--space-between-photos) / 2));
+  height: 100%;
+}
+
+.photo-row--landscape .photo-section {
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+}
+
+.photo-row--single-portrait .photo-section {
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+}
+
+.photo-row--stacked .photo-section,
+.photo-row--stacked-landscape .photo-section {
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
 }
 
 .photos-vertical-with-signature {
@@ -786,6 +831,7 @@ input[type='range'] {
   flex: 1 1 0;
   min-height: 0;
   max-height: 100%;
+  height: 100%;
 }
 
 .photo-header {
@@ -819,21 +865,25 @@ input[type='range'] {
   justify-content: center;
   flex: 1 1 auto;
   overflow: hidden;
+  width: 100%;
+  height: 100%;
 }
 
 .photo-image {
   width: 100%;
   height: 100%;
+  max-width: 100%;
   max-height: 100%;
   background: #ffffff;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+  margin: auto;
 }
 
 .photo-image.fit-contain {
   object-fit: contain;
-}
-
-.photo-image.fit-cover {
-  object-fit: cover;
+  object-position: center;
 }
 
 .photo-placeholder {

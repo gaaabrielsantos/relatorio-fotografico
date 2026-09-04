@@ -77,7 +77,7 @@ export default function A4Page({
               <div className="footer-placeholder" />
             )}
           </div>
-          <div className="page-number">{pageLabel}</div>
+          {pageLabel ? <div className="page-number">{pageLabel}</div> : null}
         </footer>
       )}
     </article>

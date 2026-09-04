@@ -6,6 +6,7 @@ import SignaturePage from './components/SignaturePage'
 import { useReportState } from './hooks/useReportState'
 import { createPdfFilename } from './utils/filenameUtils'
 import { exportReportToPdf } from './utils/exportPdf'
+import { buildPhotoPages } from './utils/reportLayout'
 import type { ReportPhoto } from './types/report'
 import './styles/report.css'
 import './styles/print.css'
@@ -23,14 +24,6 @@ type ReportPage =
       embedSignature: boolean
     }
   | { type: 'signatures' }
-
-function chunkPhotos(photos: ReportPhoto[]): ReportPhoto[][] {
-  const chunks: ReportPhoto[][] = []
-  for (let i = 0; i < photos.length; i += 2) {
-    chunks.push(photos.slice(i, i + 2))
-  }
-  return chunks
-}
 
 function App() {
   const {
@@ -97,7 +90,7 @@ function App() {
     [report.photos],
   )
 
-  const photoPages = useMemo(() => chunkPhotos(validPhotos), [validPhotos])
+  const photoPages = useMemo(() => buildPhotoPages(validPhotos), [validPhotos])
   const shouldShowDraftPhotoPage = useMemo(() => validPhotos.length === 0, [validPhotos.length])
 
   const reportPages = useMemo(() => {
@@ -142,7 +135,13 @@ function App() {
       .filter((item) => item.type !== 'draft-photo-placeholder').length
 
     const totalRenderedPages = numberedPages.length || totalPages
-    return `${report.nomenclature} ${numberedIndex}/${totalRenderedPages}`
+
+    // Keep the internal page-count logic for export/render bookkeeping, but hide the label visually.
+    void numberedIndex
+    void totalRenderedPages
+    void report.nomenclature
+
+    return ''
   }
 
   const handleReset = () => {

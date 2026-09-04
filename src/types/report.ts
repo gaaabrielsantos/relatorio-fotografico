@@ -4,10 +4,13 @@ export type Nomenclature = 'Pagina' | 'Folha'
 
 export type SignatureMode = 'physical' | 'digital'
 
+export type PhotoOrientation = 'portrait' | 'landscape'
+
 export interface ReportPhoto {
   id: string
   caption: string
   image: string | null
+  orientation: PhotoOrientation
 }
 
 export interface ReportSignature {
@@ -49,7 +52,7 @@ export interface PersistedReport {
   header: Pick<ReportHeaderFooter, 'imageDataUrl' | 'widthPercent' | 'repeatMode'>
   footer: Pick<ReportHeaderFooter, 'imageDataUrl' | 'widthPercent' | 'repeatMode'>
   generalInfo: ReportGeneralInfo
-  photos: Array<Pick<ReportPhoto, 'id' | 'caption'>>
+  photos: Array<Pick<ReportPhoto, 'id' | 'caption' | 'orientation'>>
   signatures: Array<
     Pick<ReportSignature, 'id' | 'name' | 'role' | 'registrationNumber' | 'mode'>
   >

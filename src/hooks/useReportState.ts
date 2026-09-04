@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { readStorageJson, writeStorageJson } from '../utils/storageUtils'
+import { buildPhotoPages } from '../utils/reportLayout'
 import defaultHeaderImage from '../assets/cabecalho.jpg'
 import defaultFooterImage from '../assets/rodape.png'
 import type {
@@ -21,6 +22,7 @@ function createPhoto(): ReportPhoto {
     id: crypto.randomUUID(),
     caption: '',
     image: null,
+    orientation: 'portrait',
   }
 }
 
@@ -78,7 +80,7 @@ function createPersistedReport(report: ReportData): PersistedReport {
     generalInfo: {
       ...report.generalInfo,
     },
-    photos: report.photos.map(({ id, caption }) => ({ id, caption })),
+    photos: report.photos.map(({ id, caption, orientation }) => ({ id, caption, orientation })),
     signatures: report.signatures.map(({ id, name, role, registrationNumber, mode }) => ({
       id,
       name,
@@ -167,6 +169,7 @@ function loadReportData(): ReportData {
         id: asString(photo.id, crypto.randomUUID()),
         caption: asString(photo.caption),
         image: null,
+        orientation: photo.orientation === 'landscape' ? 'landscape' : 'portrait',
       }
     })
     : [createPhoto(), createPhoto()]
@@ -224,10 +227,11 @@ export function useReportState() {
     [report.photos],
   )
 
-  const pagesForPhotos = Math.ceil(filledPhotos.length / 2)
-  const lastPhotoPageSize = filledPhotos.length % 2
+  const photoPages = useMemo(() => buildPhotoPages(filledPhotos), [filledPhotos])
+  const pagesForPhotos = photoPages.length
   const hasPhotos = filledPhotos.length > 0
-  const hasEmbeddedSignaturePage = hasPhotos && lastPhotoPageSize === 1
+  const lastPhotoPage = photoPages.at(-1)
+  const hasEmbeddedSignaturePage = hasPhotos && Boolean(lastPhotoPage && lastPhotoPage.length === 1)
   const totalPages = pagesForPhotos + (hasEmbeddedSignaturePage ? 0 : 1)
 
   const updateGeneralInfo = (field: UpdateGeneralInfoField, value: string | boolean) => {
