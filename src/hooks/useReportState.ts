@@ -51,12 +51,7 @@ function getInitialState(): ReportData {
     elaborationDateText: '',
     generalInfo: {
       title: '',
-      subtitle: '',
-      address: '',
       description: '',
-      surveyDate: '',
-      responsible: '',
-      processNumber: '',
       repeatTitle: false,
     },
     photos: [createPhoto(), createPhoto()],
@@ -206,12 +201,7 @@ function loadReportData(): ReportData {
     elaborationDateText: asString(root.elaborationDateText),
     generalInfo: {
       title: asString(generalInfo.title),
-      subtitle: asString(generalInfo.subtitle),
-      address: asString(generalInfo.address),
       description: asString(generalInfo.description),
-      surveyDate: asString(generalInfo.surveyDate),
-      responsible: asString(generalInfo.responsible),
-      processNumber: asString(generalInfo.processNumber),
       repeatTitle: asBoolean(generalInfo.repeatTitle),
     },
     photos: nextPhotos,
@@ -344,9 +334,6 @@ export function useReportState() {
 
     if (!report.generalInfo.title.trim()) {
       nextErrors.push('Preencha o titulo do relatorio.')
-    }
-    if (!report.generalInfo.address.trim()) {
-      nextErrors.push('Preencha o endereco.')
     }
     if (filledPhotos.length === 0) {
       nextErrors.push('Insira ao menos uma fotografia com imagem.')

@@ -21,12 +21,7 @@ export interface ReportSignature {
 
 export interface ReportGeneralInfo {
   title: string
-  subtitle: string
-  address: string
   description: string
-  surveyDate: string
-  responsible: string
-  processNumber: string
   repeatTitle: boolean
 }
 

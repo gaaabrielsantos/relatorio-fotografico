@@ -14,12 +14,6 @@ interface PhotoPageProps {
   watermarkPhotoPlaceholder?: boolean
 }
 
-interface InfoField {
-  label: string
-  value: string
-  placeholder: string
-}
-
 export default function PhotoPage({
   photos = [],
   allPhotos = [],
@@ -35,31 +29,6 @@ export default function PhotoPage({
   const shouldShowPhotoPlaceholder = watermarkPhotoPlaceholder && photos.length === 0
 
   const titleText = generalInfo?.title?.trim() ? generalInfo.title : 'Titulo do relatorio'
-  const subtitleText = generalInfo?.subtitle?.trim() ? generalInfo.subtitle : ''
-
-  const infoFields: InfoField[] = [
-    {
-      label: 'Endereco',
-      value: generalInfo.address,
-      placeholder: 'Endereco do local',
-    },
-    {
-      label: 'Data da vistoria',
-      value: generalInfo.surveyDate,
-      placeholder: 'Data da vistoria',
-    },
-    {
-      label: 'Responsavel',
-      value: generalInfo.responsible,
-      placeholder: 'Nome do responsavel',
-    },
-    {
-      label: 'Processo/Convenio',
-      value: generalInfo.processNumber,
-      placeholder: 'Numero do processo ou convenio',
-    },
-  ]
-
   const descriptionValue = generalInfo.description.trim()
 
   return (
@@ -67,21 +36,7 @@ export default function PhotoPage({
       {showGeneralInfo && (
         <section className="general-info-box avoid-break">
           <h2 className={generalInfo.title.trim() ? '' : 'watermark-text'}>{titleText}</h2>
-          {subtitleText ? <h3>{subtitleText}</h3> : null}
-          <div className="general-info-grid">
-            {infoFields.map((field) => {
-              const hasValue = Boolean(field.value?.trim())
-              return (
-                <p key={field.label}>
-                  <strong>{field.label}:</strong>{' '}
-                  <span className={hasValue ? '' : 'watermark-text'}>
-                    {hasValue ? field.value : field.placeholder}
-                  </span>
-                </p>
-              )
-            })}
-          </div>
-          <p className="general-info-description">
+          <p className="general-info-description description-preview-text">
             <span className={descriptionValue ? '' : 'watermark-text'}>
               {descriptionValue || 'Descricao do servico ou vistoria'}
             </span>
