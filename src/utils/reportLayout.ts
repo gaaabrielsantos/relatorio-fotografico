@@ -1,86 +1,94 @@
 import type { ReportPhoto } from '../types/report'
 
-function isPortraitLike(photo: ReportPhoto): boolean {
-  return photo.orientation !== 'landscape'
+export type PhotoPageLayout =
+  | 'grid-2x2'
+  | '2pt-1lb'
+  | '1lt-2pb'
+  | 'stacked-mixed'
+  | 'stacked-portrait'
+  | 'default-stacked'
+  | 'single'
+
+export interface PhotoPageGroup {
+  layout: PhotoPageLayout
+  photos: ReportPhoto[]
 }
 
-export function buildPhotoRows(pagePhotos: ReportPhoto[]): ReportPhoto[][] {
-  if (pagePhotos.length === 0) {
-    return []
-  }
-
-  if (pagePhotos.length === 3) {
-    const first = pagePhotos[0]
-    const second = pagePhotos[1]
-    const third = pagePhotos[2]
-
-    const isPortraitTriplet =
-      isPortraitLike(first) &&
-      second &&
-      isPortraitLike(second) &&
-      third &&
-      third.orientation === 'landscape'
-
-    const isLandscapeTriplet =
-      first?.orientation === 'landscape' &&
-      second &&
-      isPortraitLike(second) &&
-      third &&
-      isPortraitLike(third)
-
-    if (isPortraitTriplet) {
-      return [[first, second], [third]]
-    }
-
-    if (isLandscapeTriplet) {
-      return [[first], [second, third]]
-    }
-  }
-
-  return pagePhotos.map((photo) => [photo])
+function isPortrait(photo: ReportPhoto | undefined): boolean {
+  return Boolean(photo && photo.orientation !== 'landscape')
 }
 
-export function buildPhotoPages(photos: ReportPhoto[]): ReportPhoto[][] {
-  const pages: ReportPhoto[][] = []
+function isLandscape(photo: ReportPhoto | undefined): boolean {
+  return photo?.orientation === 'landscape'
+}
+
+export function paginatePhotos(photos: ReportPhoto[]): PhotoPageGroup[] {
+  const pages: PhotoPageGroup[] = []
   let index = 0
 
   while (index < photos.length) {
-    const current = photos[index]
-    const next = photos[index + 1]
-    const third = photos[index + 2]
+    const nextFour = photos.slice(index, index + 4)
+    const nextThree = photos.slice(index, index + 3)
+    const first = photos[index]
+    const second = photos[index + 1]
 
-    if (!current) {
-      break
+    if (nextFour.length === 4 && nextFour.every(isPortrait)) {
+      pages.push({ layout: 'grid-2x2', photos: nextFour })
+      index += 4
+      continue
     }
 
-    const isPortraitTriplet =
-      isPortraitLike(current) &&
-      next &&
-      isPortraitLike(next) &&
-      third &&
-      third.orientation === 'landscape'
-
-    const isLandscapeTriplet =
-      current.orientation === 'landscape' &&
-      next &&
-      isPortraitLike(next) &&
-      third &&
-      isPortraitLike(third)
-
-    if (isPortraitTriplet || isLandscapeTriplet) {
-      pages.push([current, next, third])
+    if (
+      nextThree.length === 3 &&
+      isPortrait(nextThree[0]) &&
+      isPortrait(nextThree[1]) &&
+      isLandscape(nextThree[2])
+    ) {
+      pages.push({ layout: '2pt-1lb', photos: nextThree })
       index += 3
       continue
     }
 
-    const page = [current]
-    if (next) {
-      page.push(next)
+    if (
+      nextThree.length === 3 &&
+      isLandscape(nextThree[0]) &&
+      isPortrait(nextThree[1]) &&
+      isPortrait(nextThree[2])
+    ) {
+      pages.push({ layout: '1lt-2pb', photos: nextThree })
+      index += 3
+      continue
     }
 
-    pages.push(page)
-    index += 2
+    if (isPortrait(first) && isLandscape(second)) {
+      pages.push({ layout: 'stacked-mixed', photos: [first, second] })
+      index += 2
+      continue
+    }
+
+    if (isLandscape(first) && isPortrait(second)) {
+      pages.push({ layout: 'stacked-mixed', photos: [first, second] })
+      index += 2
+      continue
+    }
+
+    if (isPortrait(first) && isPortrait(second)) {
+      pages.push({ layout: 'stacked-portrait', photos: [first, second] })
+      index += 2
+      continue
+    }
+
+    const fallbackPhotos = photos.slice(index, index + 2)
+    pages.push({
+      layout: fallbackPhotos.length === 1 ? 'single' : 'default-stacked',
+      photos: fallbackPhotos,
+    })
+    index += fallbackPhotos.length
   }
 
   return pages
+}
+
+export function buildPhotoPages(photos: ReportPhoto[]): ReportPhoto[][] {
+  return paginatePhotos(photos).map((page) => page.photos)
 }

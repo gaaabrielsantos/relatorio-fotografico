@@ -1,7 +1,9 @@
 import { ImagePlus, Trash2 } from 'lucide-react'
 import { compressImageFile } from '../utils/imageUtils'
+import type { ReportPhoto } from '../types/report'
 
-interface ImageUploadProps {
+interface SingleImageUploadProps {
+  mode?: 'single'
   label: string
   value: string
   onChange: (imageDataUrl: string) => void
@@ -10,14 +12,93 @@ interface ImageUploadProps {
   maxFileSizeMB?: number
 }
 
-export default function ImageUpload({
-  label,
-  value,
-  onChange,
-  onError,
-  onRemove,
-  maxFileSizeMB = 12,
-}: ImageUploadProps) {
+interface MultiplePhotoUploadProps {
+  mode: 'multiple-photos'
+  currentCount: number
+  onAddPhotos: (photos: ReportPhoto[]) => void
+  onError?: (message: string) => void
+  maxFileSizeMB?: number
+}
+
+type ImageUploadProps = SingleImageUploadProps | MultiplePhotoUploadProps
+
+function getOrientation(imageUrl: string): Promise<ReportPhoto['orientation']> {
+  return new Promise((resolve) => {
+    const image = new Image()
+    image.onload = () => {
+      resolve(image.naturalHeight >= image.naturalWidth ? 'portrait' : 'landscape')
+    }
+    image.onerror = () => resolve('portrait')
+    image.src = imageUrl
+  })
+}
+
+export default function ImageUpload(props: ImageUploadProps) {
+  if (props.mode === 'multiple-photos') {
+    const { currentCount, onAddPhotos, onError, maxFileSizeMB = 12 } = props
+
+    const handleFilesChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+      const input = event.currentTarget
+      const files = Array.from(input.files ?? [])
+      if (files.length === 0) return
+
+      try {
+        const newPhotos: ReportPhoto[] = []
+        const date = new Date().toISOString().split('T')[0]
+
+        for (const [index, file] of files.entries()) {
+          const processed = await compressImageFile(file, { maxFileSizeMB })
+          const rawName = file.name.replace(/\.[^/.]+$/, '')
+          newPhotos.push({
+            id: crypto.randomUUID(),
+            caption: `Foto ${currentCount + index + 1} - ${rawName}`,
+            date,
+            image: processed.dataUrl,
+            orientation: await getOrientation(processed.dataUrl),
+          })
+        }
+
+        onAddPhotos(newPhotos)
+        onError?.('')
+      } catch (error) {
+        onError?.(
+          error instanceof Error
+            ? error.message
+            : 'Nao foi possivel adicionar as imagens. Tente novamente.',
+        )
+      } finally {
+        input.value = ''
+      }
+    }
+
+    return (
+      <div className="bulk-image-upload">
+        <label className="btn secondary upload-label" htmlFor="bulk-photo-upload">
+          <ImagePlus size={16} />
+          <span>Selecionar fotos (múltiplas)</span>
+        </label>
+        <input
+          id="bulk-photo-upload"
+          className="file-input"
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          multiple
+          onChange={handleFilesChange}
+        />
+        <small>Você pode selecionar várias fotos de uma vez.</small>
+      </div>
+    )
+  }
+
+  const {
+    label,
+    value,
+    onChange,
+    onError,
+    onRemove,
+    maxFileSizeMB = 12,
+  } = props
+
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file) return

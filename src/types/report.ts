@@ -9,6 +9,7 @@ export type PhotoOrientation = 'portrait' | 'landscape'
 export interface ReportPhoto {
   id: string
   caption: string
+  date: string
   image: string | null
   orientation: PhotoOrientation
 }
@@ -52,7 +53,7 @@ export interface PersistedReport {
   header: Pick<ReportHeaderFooter, 'imageDataUrl' | 'widthPercent' | 'repeatMode'>
   footer: Pick<ReportHeaderFooter, 'imageDataUrl' | 'widthPercent' | 'repeatMode'>
   generalInfo: ReportGeneralInfo
-  photos: Array<Pick<ReportPhoto, 'id' | 'caption' | 'orientation'>>
+  photos: Array<Pick<ReportPhoto, 'id' | 'caption' | 'date' | 'orientation'>>
   signatures: Array<
     Pick<ReportSignature, 'id' | 'name' | 'role' | 'registrationNumber' | 'mode'>
   >

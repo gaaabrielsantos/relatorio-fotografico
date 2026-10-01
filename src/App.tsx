@@ -6,7 +6,8 @@ import SignaturePage from './components/SignaturePage'
 import { useReportState } from './hooks/useReportState'
 import { createPdfFilename } from './utils/filenameUtils'
 import { exportReportToPdf } from './utils/exportPdf'
-import { buildPhotoPages } from './utils/reportLayout'
+import { paginatePhotos, type PhotoPageGroup } from './utils/reportLayout'
+import { hasSignatureContent } from './utils/signatureUtils'
 import type { ReportPhoto } from './types/report'
 import './styles/report.css'
 import './styles/print.css'
@@ -20,6 +21,7 @@ type ReportPage =
   | {
       type: 'photos'
       items: ReportPhoto[]
+      layout: PhotoPageGroup['layout']
       photoPageIndex: number
       embedSignature: boolean
     }
@@ -37,6 +39,7 @@ function App() {
     updateFooter,
     updateNomenclature,
     addPhoto,
+    addPhotos,
     updatePhoto,
     removePhoto,
     movePhoto,
@@ -90,35 +93,42 @@ function App() {
     [report.photos],
   )
 
-  const photoPages = useMemo(() => buildPhotoPages(validPhotos), [validPhotos])
+  const photoPages = useMemo(() => paginatePhotos(validPhotos), [validPhotos])
   const shouldShowDraftPhotoPage = useMemo(() => validPhotos.length === 0, [validPhotos.length])
+  const filledSignatures = useMemo(
+    () => report.signatures.filter(hasSignatureContent),
+    [report.signatures],
+  )
 
   const reportPages = useMemo(() => {
     const pages: ReportPage[] = []
     const hasPhotos = photoPages.length > 0
     const lastPhotoPage = photoPages.at(-1)
-    const shouldEmbedSignatureInLastPhotoPage = Boolean(hasPhotos && lastPhotoPage?.length === 1)
+    const shouldEmbedSignatureInLastPhotoPage = Boolean(
+      filledSignatures.length > 0 && hasPhotos && lastPhotoPage?.photos.length === 1,
+    )
 
     if (!hasPhotos && shouldShowDraftPhotoPage) {
       pages.push({ type: 'draft-photo-placeholder' })
     }
 
-    photoPages.forEach((items = [], index) => {
+    photoPages.forEach(({ photos: items, layout }, index) => {
       const isLastPhotoPage = index === photoPages.length - 1
       pages.push({
         type: 'photos',
         items,
+        layout,
         photoPageIndex: index,
         embedSignature: shouldEmbedSignatureInLastPhotoPage && isLastPhotoPage,
       })
     })
 
-    if (!hasPhotos || !shouldEmbedSignatureInLastPhotoPage) {
+    if (filledSignatures.length > 0 && !shouldEmbedSignatureInLastPhotoPage) {
       pages.push({ type: 'signatures' })
     }
 
     return pages
-  }, [photoPages, shouldShowDraftPhotoPage])
+  }, [filledSignatures.length, photoPages, shouldShowDraftPhotoPage])
 
   const numberedPages = useMemo(
     () => reportPages.filter((page) => page.type !== 'draft-photo-placeholder'),
@@ -169,7 +179,6 @@ function App() {
     try {
       await exportReportToPdf({
         container: previewElement,
-        pageSelector: '.report-page',
         filename: fileName,
       })
     } catch {
@@ -202,6 +211,7 @@ function App() {
           onHeaderUpdate={updateHeader}
           onFooterUpdate={updateFooter}
           onAddPhoto={addPhoto}
+          onAddPhotos={addPhotos}
           onUpdatePhoto={updatePhoto}
           onRemovePhoto={removePhoto}
           onMovePhoto={movePhoto}
@@ -216,7 +226,7 @@ function App() {
         />
 
         <section className="report-preview preview-panel preview" id="report-preview" ref={previewPanelRef}>
-          <div className="preview-content report-pages" ref={previewPagesRef}>
+          <div className="preview-content report-pages" id="report-pages" ref={previewPagesRef}>
             {reportPages.map((page, pageIndex) => {
               const firstPage = pageIndex === 0
               const showHeader = report.header.repeatMode === 'all' || firstPage
@@ -244,6 +254,7 @@ function App() {
                       {page.type === 'photos' && (
                         <PhotoPage
                           photos={page.items}
+                          layout={page.layout}
                           allPhotos={validPhotos}
                           showGeneralInfo={page.photoPageIndex === 0}
                           showRepeatedTitle={page.photoPageIndex > 0 && report.generalInfo.repeatTitle}
@@ -266,14 +277,9 @@ function App() {
                         />
                       )}
                       {page.type === 'signatures' && (
-                        <>
-                          {report.elaborationDateText.trim() && (
-                            <section className="elaboration-date-section avoid-break">
-                              <p>{report.elaborationDateText}</p>
-                            </section>
-                          )}
-                          <SignaturePage signatures={report.signatures} />
-                        </>
+                        <SignaturePage
+                          signatures={report.signatures}
+                        />
                       )}
                     </A4Page>
                   </div>

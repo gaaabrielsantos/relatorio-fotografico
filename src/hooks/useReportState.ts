@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { readStorageJson, writeStorageJson } from '../utils/storageUtils'
 import { buildPhotoPages } from '../utils/reportLayout'
+import { hasSignatureContent } from '../utils/signatureUtils'
 import defaultHeaderImage from '../assets/cabecalho.jpg'
 import defaultFooterImage from '../assets/rodape.png'
 import type {
@@ -21,6 +22,7 @@ function createPhoto(): ReportPhoto {
   return {
     id: crypto.randomUUID(),
     caption: '',
+    date: '',
     image: null,
     orientation: 'portrait',
   }
@@ -80,7 +82,12 @@ function createPersistedReport(report: ReportData): PersistedReport {
     generalInfo: {
       ...report.generalInfo,
     },
-    photos: report.photos.map(({ id, caption, orientation }) => ({ id, caption, orientation })),
+    photos: report.photos.map(({ id, caption, date, orientation }) => ({
+      id,
+      caption,
+      date,
+      orientation,
+    })),
     signatures: report.signatures.map(({ id, name, role, registrationNumber, mode }) => ({
       id,
       name,
@@ -162,12 +169,13 @@ function loadReportData(): ReportData {
     Math.min(100, asNumber(footer.widthPercent, 100)),
   )
 
-  const nextPhotos = loadedPhotos.length > 0
+  const nextPhotos: ReportPhoto[] = loadedPhotos.length > 0
     ? loadedPhotos.map((photoValue) => {
       const photo = asRecord(photoValue)
       return {
         id: asString(photo.id, crypto.randomUUID()),
         caption: asString(photo.caption),
+        date: asString(photo.date),
         image: null,
         orientation: photo.orientation === 'landscape' ? 'landscape' : 'portrait',
       }
@@ -175,7 +183,7 @@ function loadReportData(): ReportData {
     : [createPhoto(), createPhoto()]
 
   const slicedSignatures = loadedSignatures.slice(0, 4)
-  const nextSignatures = slicedSignatures.length > 0
+  const nextSignatures: ReportSignature[] = slicedSignatures.length > 0
     ? slicedSignatures.map((signatureValue) => {
       const signature = asRecord(signatureValue)
       return {
@@ -273,6 +281,13 @@ export function useReportState() {
     }))
   }
 
+  const addPhotos = (newPhotos: ReportPhoto[]) => {
+    setReport((prev) => ({
+      ...prev,
+      photos: [...prev.photos, ...newPhotos],
+    }))
+  }
+
   const updatePhoto = (photoId: string, patch: UpdatePhotoPatch) => {
     setReport((prev) => ({
       ...prev,
@@ -320,7 +335,6 @@ export function useReportState() {
 
   const removeSignature = (signatureId: string) => {
     setReport((prev) => {
-      if (prev.signatures.length <= 1) return prev
       return {
         ...prev,
         signatures: prev.signatures.filter((item) => item.id !== signatureId),
@@ -342,11 +356,7 @@ export function useReportState() {
     if (filledPhotos.length === 0) {
       nextErrors.push('Insira ao menos uma fotografia com imagem.')
     }
-    if (report.signatures.length === 0) {
-      nextErrors.push('Insira ao menos um responsavel para assinatura.')
-    }
-
-    report.signatures.forEach((signature, index) => {
+    report.signatures.filter(hasSignatureContent).forEach((signature, index) => {
       if (!signature.name.trim()) {
         nextErrors.push(`Preencha o nome do responsavel ${index + 1}.`)
       }
@@ -369,6 +379,7 @@ export function useReportState() {
     updateFooter,
     updateNomenclature,
     addPhoto,
+    addPhotos,
     updatePhoto,
     removePhoto,
     movePhoto,

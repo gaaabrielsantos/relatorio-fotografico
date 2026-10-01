@@ -66,7 +66,6 @@ export default function SignatureSection({
                     type="button"
                     className="btn danger"
                     onClick={() => onRemove(signature.id)}
-                    disabled={signatures.length === 1}
                   >
                     <Trash2 size={16} />
                     <span>Remover</span>

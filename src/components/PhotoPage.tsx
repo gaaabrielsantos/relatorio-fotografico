@@ -1,11 +1,11 @@
-import { useMemo } from 'react'
 import PhotoSection from './PhotoSection'
 import SignaturePage from './SignaturePage'
-import { buildPhotoRows } from '../utils/reportLayout'
+import type { PhotoPageLayout } from '../utils/reportLayout'
 import type { ReportGeneralInfo, ReportPhoto, ReportSignature } from '../types/report'
 
 interface PhotoPageProps {
   photos?: ReportPhoto[]
+  layout?: PhotoPageLayout
   allPhotos?: ReportPhoto[]
   showGeneralInfo: boolean
   showRepeatedTitle: boolean
@@ -18,6 +18,7 @@ interface PhotoPageProps {
 
 export default function PhotoPage({
   photos = [],
+  layout = 'single',
   allPhotos = [],
   showGeneralInfo,
   showRepeatedTitle,
@@ -32,7 +33,7 @@ export default function PhotoPage({
 
   const titleText = generalInfo?.title?.trim() ? generalInfo.title : 'Titulo do relatorio'
   const descriptionValue = generalInfo.description.trim()
-  const photoRows = useMemo(() => buildPhotoRows(photos), [photos])
+  const layoutClass = `layout-${layout}`
 
   return (
     <div className="photo-page-content">
@@ -53,34 +54,10 @@ export default function PhotoPage({
         </section>
       )}
 
-      <div className={`photos-vertical ${shouldEmbedSignature ? 'photos-vertical-with-signature' : ''}`}>
-        {photoRows.map((row, rowIndex) => {
-          const isPortraitPair = row.length === 2 && row.every((photo) => photo.orientation !== 'landscape')
-          const isLandscapeRow = row.length === 1 && row[0]?.orientation === 'landscape'
-          const isSinglePortraitRow = row.length === 1 && row[0]?.orientation !== 'landscape'
-          const isStackedPair = photoRows.length === 2 && photoRows.every((entry) => entry.length === 1)
-          const isLandscapeStack = isStackedPair && row.every((photo) => photo.orientation === 'landscape')
-
-          return (
-            <div
-              key={`photo-row-${row.map((photo) => photo.id).join('-') || rowIndex}`}
-              className={[
-                'photo-row',
-                isPortraitPair ? 'photo-row--portrait-pair' : '',
-                isLandscapeRow ? 'photo-row--landscape' : '',
-                isSinglePortraitRow ? 'photo-row--single-portrait' : '',
-                isStackedPair ? 'photo-row--stacked' : '',
-                isLandscapeStack ? 'photo-row--stacked-landscape' : '',
-              ]
-                .filter(Boolean)
-                .join(' ')}
-            >
-              {row.map((photo) => {
-                const index = allPhotos.findIndex((item) => item.id === photo.id)
-                return <PhotoSection key={photo.id} photo={photo} index={index} />
-              })}
-            </div>
-          )
+      <div className={`photos-vertical ${layoutClass}${shouldEmbedSignature ? ' photos-vertical-with-signature' : ''}`}>
+        {photos.map((photo) => {
+          const index = allPhotos.findIndex((item) => item.id === photo.id)
+          return <PhotoSection key={photo.id} photo={photo} index={index} />
         })}
 
         {shouldShowPhotoPlaceholder && <PhotoSection photo={null} index={0} watermarkPlaceholder />}

@@ -26,6 +26,7 @@ interface SidebarProps {
   onHeaderUpdate: (patch: Partial<ReportHeaderFooter>) => void
   onFooterUpdate: (patch: Partial<ReportHeaderFooter>) => void
   onAddPhoto: () => void
+  onAddPhotos: (photos: ReportPhoto[]) => void
   onUpdatePhoto: (photoId: string, patch: Partial<ReportPhoto>) => void
   onRemovePhoto: (photoId: string) => void
   onMovePhoto: (photoId: string, direction: 'up' | 'down') => void
@@ -47,6 +48,7 @@ export default function Sidebar({
   onHeaderUpdate,
   onFooterUpdate,
   onAddPhoto,
+  onAddPhotos,
   onUpdatePhoto,
   onRemovePhoto,
   onMovePhoto,
@@ -101,6 +103,7 @@ export default function Sidebar({
         <PhotoEditorList
           photos={report.photos}
           onAddPhoto={onAddPhoto}
+          onAddPhotos={onAddPhotos}
           onUpdate={onUpdatePhoto}
           onRemove={onRemovePhoto}
           onMove={onMovePhoto}

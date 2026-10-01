@@ -1,10 +1,12 @@
 import { ArrowDown, ArrowUp, ImagePlus, Trash2 } from 'lucide-react'
 import { compressImageFile } from '../utils/imageUtils'
+import ImageUpload from './ImageUpload'
 import type { ReportPhoto } from '../types/report'
 
 interface PhotoEditorListProps {
   photos: ReportPhoto[]
   onAddPhoto: () => void
+  onAddPhotos: (photos: ReportPhoto[]) => void
   onUpdate: (photoId: string, patch: Partial<ReportPhoto>) => void
   onRemove: (photoId: string) => void
   onMove: (photoId: string, direction: 'up' | 'down') => void
@@ -14,6 +16,7 @@ interface PhotoEditorListProps {
 export default function PhotoEditorList({
   photos,
   onAddPhoto,
+  onAddPhotos,
   onUpdate,
   onRemove,
   onMove,
@@ -35,18 +38,16 @@ export default function PhotoEditorList({
         throw new Error('Nao foi possivel processar a imagem.')
       }
 
-      const image = new Image()
       const imageUrl = processed.dataUrl
-      image.onload = () => {
-        const orientation = image.naturalHeight >= image.naturalWidth ? 'portrait' : 'landscape'
-        onUpdate(photoId, { image: imageUrl, orientation })
-        onError?.('')
-      }
-      image.onerror = () => {
-        onUpdate(photoId, { image: imageUrl, orientation: 'portrait' })
-        onError?.('')
-      }
-      image.src = imageUrl
+      const orientation = await new Promise<ReportPhoto['orientation']>((resolve) => {
+        const image = new Image()
+        image.onload = () =>
+          resolve(image.naturalHeight >= image.naturalWidth ? 'portrait' : 'landscape')
+        image.onerror = () => resolve('portrait')
+        image.src = imageUrl
+      })
+      onUpdate(photoId, { image: imageUrl, orientation, date: new Date().toISOString().split('T')[0] })
+      onError?.('')
     } catch (error) {
       onError?.(error instanceof Error ? error.message : 'Nao foi possivel adicionar esta imagem. Tente novamente.')
     } finally {
@@ -130,6 +131,12 @@ export default function PhotoEditorList({
         ))}
 
         <div className="photo-list-add-action">
+          <ImageUpload
+            mode="multiple-photos"
+            currentCount={photos.filter((photo) => Boolean(photo.image)).length}
+            onAddPhotos={onAddPhotos}
+            onError={onError}
+          />
           <button type="button" className="btn secondary" onClick={onAddPhoto}>
             <ImagePlus size={16} />
             <span>Adicionar fotografia</span>

@@ -1,10 +1,8 @@
-import html2canvas from 'html2canvas'
-import jsPDF from 'jspdf'
+import html2pdf from 'html2pdf.js'
 
 export interface ExportPdfOptions {
   filename: string
   container: HTMLElement
-  pageSelector?: string
 }
 
 export async function waitForImages(element: HTMLElement): Promise<void> {
@@ -44,9 +42,7 @@ async function waitForRenderFrames(): Promise<void> {
   )
 }
 
-export async function exportReportToPdf(options: ExportPdfOptions): Promise<void> {
-  const { filename, container, pageSelector = '.report-page' } = options
-
+export async function exportReportToPdf({ filename, container }: ExportPdfOptions): Promise<void> {
   if ('fonts' in document) {
     await (document as Document & { fonts: FontFaceSet }).fonts.ready
   }
@@ -54,57 +50,43 @@ export async function exportReportToPdf(options: ExportPdfOptions): Promise<void
   await waitForImages(container)
   await waitForRenderFrames()
 
-  const allPages = Array.from(container.querySelectorAll<HTMLElement>(pageSelector)).filter(
+  const pageNodes = Array.from(container.querySelectorAll<HTMLElement>('.a4-page')).filter(
     (page) => !page.closest('.no-print-placeholder-page'),
   )
-
-  const pageNodes = allPages.filter((page) => {
-    const rect = page.getBoundingClientRect()
-    const computed = window.getComputedStyle(page)
-    const isHidden = computed.display === 'none' || computed.visibility === 'hidden'
-
-    return !isHidden && rect.width > 0 && rect.height > 0 && page.childElementCount > 0
-  })
-
   if (pageNodes.length === 0) {
     throw new Error('Nao foi possivel localizar paginas para exportacao.')
   }
-
-  const pdf = new jsPDF({
-    orientation: 'portrait',
-    unit: 'mm',
-    format: 'a4',
-    compress: true,
-  })
-
-  for (let index = 0; index < pageNodes.length; index += 1) {
-    const page = pageNodes[index]
-    const width = Math.ceil(page.offsetWidth)
-    const height = Math.ceil(page.offsetHeight)
-
-    const canvas = await html2canvas(page, {
-      scale: 2,
-      useCORS: true,
-      allowTaint: true,
-      backgroundColor: '#ffffff',
-      logging: false,
-      width,
-      height,
-      windowWidth: width,
-      windowHeight: height,
-      scrollX: 0,
-      scrollY: 0,
-      removeContainer: true,
-    })
-
-    const imageData = canvas.toDataURL('image/jpeg', 0.98)
-
-    if (index > 0) {
-      pdf.addPage('a4', 'portrait')
-    }
-
-    pdf.addImage(imageData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST')
+  if (!container.id) {
+    throw new Error('O elemento do relatorio precisa ter um ID para exportacao.')
   }
 
-  pdf.save(filename)
+  const options = {
+    margin: 0,
+    filename,
+    image: { type: 'jpeg' as const, quality: 0.98 },
+    html2canvas: {
+      scale: 2,
+      useCORS: true,
+      logging: false,
+      scrollY: 0,
+      scrollX: 0,
+      onclone: (clonedDocument: Document) => {
+        const clonedContainer = clonedDocument.getElementById(container.id)
+        clonedContainer?.classList.add('pdf-export-mode')
+        clonedContainer
+          ?.querySelectorAll('.no-print-placeholder-page')
+          .forEach((placeholder) => placeholder.remove())
+      },
+    },
+    jsPDF: {
+      unit: 'mm',
+      format: 'a4',
+      orientation: 'portrait' as const,
+    },
+    pagebreak: {
+      mode: 'css',
+    },
+  }
+
+  await html2pdf().set(options).from(container).save()
 }

@@ -57,7 +57,7 @@ export default function PhotoSection({
   return (
     <article className="photo-section avoid-break">
       <header className="photo-header">
-        <h4>{identifier}</h4>
+        <h4 className="photo-caption">{identifier}</h4>
       </header>
 
       <div className="photo-frame">
